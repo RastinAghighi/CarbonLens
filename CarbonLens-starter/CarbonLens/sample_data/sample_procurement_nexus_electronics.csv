@@ -1,0 +1,59 @@
+Vendor,Item Description,PO #,Amount ($),Qty,Unit,Ship From,Date,Notes
+Apex Steel Solutions,"Cold-rolled steel sheets, 16ga",PO-2025-0341,847000,120,tonnes,Gary IN,2025-01-15,Annual contract renewal
+Apex Steel Solutions,Steel coils - galvanized,PO-2025-0342,423000,,tonnes,Gary IN,2025-01-15,
+Pacific Rim Aluminum Co,Aluminum extrusions 6061-T6,PO-2025-0287,612000,85,tonnes,"Shenzhen, China",2025-01-22,
+Pacific Rim Aluminum Co,"Aluminum sheet, 3mm",PO-2025-0288,234000,32,tonnes,"Shenzhen, China",2025-01-22,
+Pacific Rim Aluminum Co,Tooling aluminum blocks,PO-2025-0401,89000,,,Shenzhen China,2025-02-10,
+GlobalTrans Logistics,Ocean freight - Asia to LAX (Q1),PO-2025-0312,287000,,,"Shanghai, CN → Los Angeles, CA",2025-01-08,FCL 40ft containers x24
+GlobalTrans Logistics,Customs brokerage & handling,PO-2025-0313,34500,,,Los Angeles CA,2025-01-08,
+SWIFT AIR CARGO INC,Air freight - emergency shipment,PO-2025-0445,156000,18,tonnes,"Shenzhen → Chicago O'Hare",2025-03-02,Expedited - production delay
+SWIFT AIR CARGO INC,Air freight - component shortage,PO-2025-0467,94000,11,tonnes,Taipei → LAX,2025-03-11,URGENT
+Midwest Trucking LLC,FTL domestic - IL to distribution centers,PO-2025-0298,178000,,,"Chicago, IL (various)",2025-01-06,Monthly contract
+Midwest Trucking LLC,LTL regional deliveries Q1,PO-2025-0332,67000,,,Midwest region,2025-01-20,
+Midwest Trucking LLC,LTL regional Q2,PO-2025-0489,71000,,,Midwest,2025-04-01,
+ShenZhen MicroTech Ltd,PCB assemblies - main board v4.2,PO-2025-0267,1890000,45000,units,"Shenzhen, China",2024-12-18,
+ShenZhen MicroTech Ltd,PCB assemblies - power board,PO-2025-0268,567000,45000,pcs,Shenzhen,2024-12-18,
+ShenZhen MicroTech Ltd,"Flex cables, assorted",PO-2025-0356,123000,90000,pcs,Shenzhen,2025-02-01,
+Taiwan Semiconductor Partners,IC chips - custom ASIC,PO-2025-0234,3400000,200000,units,"Hsinchu, Taiwan",2024-12-01,Long lead time item
+Taiwan Semiconductor Partners,Memory modules DDR5,PO-2025-0235,1250000,100000,pcs,Hsinchu Taiwan,2024-12-01,
+Consolidated Plastics Inc,ABS injection molded housings,PO-2025-0301,456000,50000,units,"Detroit, MI",2025-01-10,
+Consolidated Plastics Inc,Polycarbonate display covers,PO-2025-0302,312000,50000,units,Detroit MI,2025-01-10,
+Consolidated Plastics Inc,Misc plastic components,PO-2025-0378,87000,,,,2025-02-14,Various small parts
+EcoPack Solutions,Corrugated boxes - custom printed,PO-2025-0315,134000,60000,units,"Milwaukee, WI",2025-01-12,
+EcoPack Solutions,Foam inserts - molded,PO-2025-0316,89000,60000,units,Milwaukee WI,2025-01-12,
+EcoPack Solutions,Shrink wrap & pallet wrap,PO-2025-0317,23000,,,Milwaukee,2025-01-12,
+GreenPower Utilities,,PO-2025-0001,890000,4200000,kWh,Illinois Grid,2025-01-01,Annual electricity contract
+,Natural gas supply - factory heating,PO-2025-0002,345000,120000,therms,Peoples Gas Chicago,2025-01-01,Annual contract
+Pinnacle IT Services,Cloud hosting - AWS,PO-2025-0278,234000,,,N/A,2025-01-03,Annual SaaS/cloud
+Pinnacle IT Services,Software licenses (annual),PO-2025-0279,167000,,,N/A,2025-01-03,CAD/CAM/ERP licenses
+Pinnacle IT Services,IT support retainer,PO-2025-0280,144000,,,N/A,2025-01-03,
+CopperWire Direct,Copper wiring harnesses,PO-2025-0334,267000,15,tonnes,"Phoenix, AZ",2025-01-18,
+CopperWire Direct,"Connectors, terminals, misc copper",PO-2025-0335,78000,,,Phoenix AZ,2025-01-18,
+Jiangsu Display Tech,LCD panels 15.6 inch,PO-2025-0289,1670000,50000,units,"Nanjing, China",2025-01-05,
+Jiangsu Display Tech,OLED panels 13.3 inch,PO-2025-0290,2340000,30000,units,Nanjing China,2025-01-05,
+Jiangsu Display Tech,Display driver ICs,PO-2025-0291,345000,80000,pcs,Nanjing,2025-01-05,
+American Business Travel Inc,Employee flights - Q1 2025,PO-2025-0350,189000,,,Various,2025-01-25,"340 flights, mostly domestic"
+American Business Travel Inc,Employee flights - Q2 2025,PO-2025-0490,145000,,,Various,2025-04-02,"267 flights, mix domestic/intl"
+Marriott/Hilton Corporate,Hotel stays - Q1,PO-2025-0351,67000,,,Various US cities,2025-01-25,~450 room nights
+Marriott/Hilton Corporate,Hotel stays Q2,PO-2025-0491,52000,,,various,2025-04-02,
+Enterprise Fleet,Rental cars - Q1-Q2,PO-2025-0352,34000,,,Various,2025-01-25,
+CleanTech Waste Services,Hazardous waste disposal,PO-2025-0310,56000,45,tonnes,"Romeoville, IL",2025-01-10,Electronic waste + solvents
+CleanTech Waste Services,General waste & recycling,PO-2025-0311,28000,,,"Chicago, IL",2025-01-10,Monthly service
+CleanTech Waste Services,Recycling services Q2,PO-2025-0488,29000,,,Chicago IL,2025-04-01,
+Precision Metal Works,CNC machined parts - aluminum,PO-2025-0367,234000,,,Rockford IL,2025-02-05,Custom parts per engineering specs
+Precision Metal Works,CNC machined parts - steel,PO-2025-0368,189000,,,Rockford IL,2025-02-05,
+Henkel Adhesives,Industrial adhesives & sealants,PO-2025-0389,67000,8,tonnes,"Rocky Hill, CT",2025-02-20,
+Henkel Adhesives,Thermal paste & compounds,PO-2025-0390,23000,,,Rocky Hill CT,2025-02-20,
+Fastenal Supply,Fasteners screws bolts (blanket PO),PO-2025-0256,89000,,,,2024-12-15,Quarterly blanket order
+Fastenal Supply,"O-rings, gaskets, seals",PO-2025-0257,34000,,,,2024-12-15,
+Grainger Industrial,MRO supplies - misc,PO-2025-0400,78000,,,,2025-02-08,"Safety equipment, tools, misc"
+Grainger Industrial,Janitorial supplies,PO-2025-0399,12000,,,,2025-02-08,
+CaterCorp Food Services,Cafeteria services (monthly),PO-2025-0003,156000,,,On-site,2025-01-01,~200 employees daily
+Konica Minolta,Office equipment lease,PO-2025-0004,18000,,,N/A,2025-01-01,Printers copiers
+Staples Business,Office supplies - misc,PO-2025-0405,8900,,,,2025-02-12,Paper toner misc
+Liberty Mutual,Property & casualty insurance,PO-2025-0005,234000,,,N/A,2025-01-01,Annual premium
+Baker McKenzie LLP,Legal services retainer,PO-2025-0006,189000,,,Chicago IL,2025-01-01,
+Deloitte Consulting,ERP implementation consulting,PO-2025-0412,345000,,,Chicago IL,2025-02-18,Phase 2 of SAP rollout
+Subtotal Q1-Q2,,,,,,,,
+,,,,,,,,
+TOTAL FY PROJECTED,,"~$48M",,,,,,"Procurement mgr estimate, June 2025"
