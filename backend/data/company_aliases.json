@@ -1,0 +1,10 @@
+{
+  "ExxonMobil": ["Exxon Mobil Corporation", "ExxonMobil Corp", "Exxon Mobil Corp.", "XTO Energy"],
+  "Amazon": ["Amazon.com Services LLC", "Amazon Data Services", "Amazon.com Inc"],
+  "Shell": ["Shell USA, Inc.", "Shell Oil Company", "Shell Chemical LP", "Shell Pipeline Company"],
+  "Chevron": ["Chevron U.S.A. Inc.", "Chevron Phillips Chemical", "Chevron Corporation"],
+  "Meta": ["Meta Platforms Inc", "Facebook Inc"],
+  "Google": ["Google LLC", "Alphabet Inc"],
+  "Microsoft": ["Microsoft Corporation"],
+  "Apple": ["Apple Inc"]
+}
