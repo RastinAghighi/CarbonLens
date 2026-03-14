@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --color-teal-primary: #0D9488;
+  --color-teal-hover: #0B8278;
+  --color-gray-bg: #F9FAFB;
+  --color-gray-border: #E5E7EB;
+  --color-text-primary: #111827;
+  --color-text-body: #374151;
+  --color-text-secondary: #6B7280;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text-body);
+  background: #FFFFFF;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
