@@ -56,6 +56,20 @@ async def _run_pipeline(job_id: str) -> None:
 
             state = await agent_def["fn"](state)
 
+            # Debug: print state keys after each agent completes
+            print(f"\n[DEBUG] Agent {i+1} ({agent_def['name']}) complete.")
+            print(f"[DEBUG]   State keys: {list(state.keys())}")
+            for key in state:
+                val = state[key]
+                if isinstance(val, list):
+                    print(f"[DEBUG]   state['{key}']: list with {len(val)} items")
+                elif isinstance(val, dict):
+                    print(f"[DEBUG]   state['{key}']: dict with keys {list(val.keys())[:5]}")
+                elif isinstance(val, str) and len(val) > 200:
+                    print(f"[DEBUG]   state['{key}']: str ({len(val)} chars)")
+                else:
+                    print(f"[DEBUG]   state['{key}']: {repr(val)[:100]}")
+
             job["agents"][i]["status"] = "complete"
             job["agents"][i]["message"] = _agent_summary(i, state)
 

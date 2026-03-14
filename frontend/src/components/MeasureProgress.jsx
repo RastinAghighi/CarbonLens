@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 
 const AGENTS = [
-  { key: 'company_intelligence', label: 'Company Intelligence', icon: '1' },
-  { key: 'report_extraction', label: 'Report Extraction', icon: '2' },
-  { key: 'independent_data', label: 'Independent Data', icon: '3' },
-  { key: 'cross_reference', label: 'Cross-Reference & Scoring', icon: '4' },
-  { key: 'report_generation', label: 'Report Generation', icon: '5' },
+  { key: 'data_ingestion', label: 'Data Ingestion', icon: '1' },
+  { key: 'category_classification', label: 'Category Classification', icon: '2' },
+  { key: 'emission_factor_calculation', label: 'Emission Factor Calculation', icon: '3' },
+  { key: 'analysis_recommendations', label: 'Analysis & Recommendations', icon: '4' },
 ];
 
 function AgentRow({ agent, status, summary }) {
@@ -15,7 +14,6 @@ function AgentRow({ agent, status, summary }) {
 
   return (
     <div className="flex items-start gap-4 py-4">
-      {/* Status indicator */}
       <div className="flex flex-col items-center">
         <div
           className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
@@ -42,7 +40,6 @@ function AgentRow({ agent, status, summary }) {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
         <p
           className={`text-sm font-semibold transition-colors ${
@@ -87,7 +84,7 @@ function PreviewCard({ label, value }) {
 
 const API_BASE = 'http://localhost:8001';
 
-export default function VerifyProgress({ companyName, onBack, onComplete }) {
+export default function MeasureProgress({ file, onBack, onComplete }) {
   const [jobId, setJobId] = useState(null);
   const [agentStatuses, setAgentStatuses] = useState({});
   const [previews, setPreviews] = useState([]);
@@ -103,10 +100,12 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
 
     async function startJob() {
       try {
-        const res = await fetch(`${API_BASE}/api/verify`, {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch(`${API_BASE}/api/measure`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ company_name: companyName }),
+          body: formData,
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
@@ -118,7 +117,7 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
 
     startJob();
     return () => { cancelled = true; };
-  }, [companyName]);
+  }, [file]);
 
   // Elapsed timer
   useEffect(() => {
@@ -134,12 +133,12 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
 
     async function poll() {
       try {
-        const res = await fetch(`${API_BASE}/api/verify/${jobId}`);
+        const res = await fetch(`${API_BASE}/api/measure/${jobId}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
         // Backend returns agents as a list; map to dict keyed by our agent keys
-        const agentKeys = ['company_intelligence', 'report_extraction', 'independent_data', 'cross_reference', 'report_generation'];
+        const agentKeys = ['data_ingestion', 'category_classification', 'emission_factor_calculation', 'analysis_recommendations'];
         const agentMap = {};
         if (Array.isArray(data.agents)) {
           data.agents.forEach((a, idx) => {
@@ -157,7 +156,6 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
         if (data.status === 'complete') {
           clearInterval(pollRef.current);
           clearInterval(timerRef.current);
-          // Small delay for UX
           setTimeout(() => onComplete(data.result), 800);
         } else if (data.status === 'error') {
           clearInterval(pollRef.current);
@@ -165,7 +163,6 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
           setError(data.error || 'Analysis failed');
         }
       } catch (err) {
-        // Don't stop polling on transient errors
         console.error('Poll error:', err);
       }
     }
@@ -196,7 +193,7 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
           </button>
           <div className="flex-1">
             <h1 className="text-lg font-semibold text-[#111827]">
-              Analyzing: <span className="text-[#0D9488]">{companyName}</span>
+              Measuring: <span className="text-[#0D9488]">{file.name}</span>
             </h1>
           </div>
           <div

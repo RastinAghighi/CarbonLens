@@ -119,7 +119,7 @@ async def category_classification_agent(state: dict) -> dict:
 
     response = client.messages.create(
         model=MODEL,
-        max_tokens=8192,
+        max_tokens=16384,
         system=SYSTEM_PROMPT,
         messages=[
             {

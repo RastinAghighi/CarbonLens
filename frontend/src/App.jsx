@@ -1,9 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import VerifyProgress from './components/VerifyProgress';
 import VerifyResults from './components/VerifyResults';
+import MeasureProgress from './components/MeasureProgress';
+import MeasureResults from './components/MeasureResults';
 
-function LandingPage({ onAnalyze }) {
+function LandingPage({ onAnalyze, onMeasure }) {
   const [companyName, setCompanyName] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
 
   function handleAnalyze() {
     const name = companyName.trim();
@@ -12,6 +17,33 @@ function LandingPage({ onAnalyze }) {
 
   function handleKeyDown(e) {
     if (e.key === 'Enter') handleAnalyze();
+  }
+
+  function handleFileSelect(file) {
+    if (file && (file.name.endsWith('.csv') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      setSelectedFile(file);
+    }
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileSelect(file);
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    setDragOver(true);
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault();
+    setDragOver(false);
+  }
+
+  function handleCalculate() {
+    if (selectedFile) onMeasure(selectedFile);
   }
 
   return (
@@ -114,28 +146,79 @@ function LandingPage({ onAnalyze }) {
               </div>
 
               <div className="mt-auto pt-4">
-                <div className="rounded-lg border-2 border-dashed border-[#D1D5DB] bg-white px-6 py-6 text-center mb-4 transition hover:border-[#0D9488]/40">
-                  <svg
-                    className="w-8 h-8 text-[#9CA3AF] mx-auto mb-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
-                    />
-                  </svg>
-                  <p className="text-sm text-[#6B7280] mb-1">
-                    Drop CSV or Excel files here
-                  </p>
-                  <button className="text-sm text-[#0D9488] font-medium hover:underline cursor-pointer bg-transparent border-none">
-                    Browse files
-                  </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  onChange={(e) => handleFileSelect(e.target.files[0])}
+                  className="hidden"
+                />
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`rounded-lg border-2 border-dashed bg-white px-6 py-6 text-center mb-4 transition cursor-pointer ${
+                    dragOver
+                      ? 'border-[#0D9488] bg-[#0D9488]/5'
+                      : selectedFile
+                      ? 'border-[#059669] bg-[#059669]/5'
+                      : 'border-[#D1D5DB] hover:border-[#0D9488]/40'
+                  }`}
+                >
+                  {selectedFile ? (
+                    <>
+                      <svg
+                        className="w-8 h-8 text-[#059669] mx-auto mb-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m4.5 12.75 6 6 9-13.5"
+                        />
+                      </svg>
+                      <p className="text-sm text-[#059669] font-medium">{selectedFile.name}</p>
+                      <p className="text-xs text-[#6B7280] mt-1">
+                        {(selectedFile.size / 1024).toFixed(1)} KB — click to change
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-8 h-8 text-[#9CA3AF] mx-auto mb-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+                        />
+                      </svg>
+                      <p className="text-sm text-[#6B7280] mb-1">
+                        Drop CSV or Excel files here
+                      </p>
+                      <p className="text-sm text-[#0D9488] font-medium">
+                        Browse files
+                      </p>
+                    </>
+                  )}
                 </div>
-                <button className="w-full rounded-lg border-2 border-[#0D9488] text-[#0D9488] hover:bg-[#0D9488]/5 font-medium px-6 py-2.5 text-sm transition-colors cursor-pointer bg-transparent">
+                <button
+                  onClick={handleCalculate}
+                  disabled={!selectedFile}
+                  className={`w-full rounded-lg font-medium px-6 py-2.5 text-sm transition-colors cursor-pointer ${
+                    selectedFile
+                      ? 'bg-[#0D9488] hover:bg-[#0B8278] text-white'
+                      : 'border-2 border-[#0D9488] text-[#0D9488] hover:bg-[#0D9488]/5 bg-transparent'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
                   Calculate
                 </button>
               </div>
@@ -181,47 +264,80 @@ function LandingPage({ onAnalyze }) {
 }
 
 function App() {
-  // State-based routing: 'landing' | 'progress' | 'results'
+  // State-based routing: 'landing' | 'verify-progress' | 'verify-results' | 'measure-progress' | 'measure-results'
   const [view, setView] = useState('landing');
   const [companyName, setCompanyName] = useState('');
-  const [result, setResult] = useState(null);
+  const [verifyResult, setVerifyResult] = useState(null);
+  const [measureFile, setMeasureFile] = useState(null);
+  const [measureResult, setMeasureResult] = useState(null);
 
   function handleAnalyze(name) {
     setCompanyName(name);
-    setView('progress');
+    setView('verify-progress');
   }
 
-  const handleComplete = useCallback((resultData) => {
-    setResult(resultData);
-    setView('results');
+  function handleMeasure(file) {
+    setMeasureFile(file);
+    setView('measure-progress');
+  }
+
+  const handleVerifyComplete = useCallback((resultData) => {
+    setVerifyResult(resultData);
+    setView('verify-results');
+  }, []);
+
+  const handleMeasureComplete = useCallback((resultData) => {
+    setMeasureResult(resultData);
+    setView('measure-results');
   }, []);
 
   function handleBack() {
     setView('landing');
-    setResult(null);
+    setVerifyResult(null);
+    setMeasureFile(null);
+    setMeasureResult(null);
   }
 
-  if (view === 'progress') {
+  if (view === 'verify-progress') {
     return (
       <VerifyProgress
         companyName={companyName}
         onBack={handleBack}
-        onComplete={handleComplete}
+        onComplete={handleVerifyComplete}
       />
     );
   }
 
-  if (view === 'results') {
+  if (view === 'verify-results') {
     return (
       <VerifyResults
         companyName={companyName}
-        result={result}
+        result={verifyResult}
         onNewAnalysis={handleBack}
       />
     );
   }
 
-  return <LandingPage onAnalyze={handleAnalyze} />;
+  if (view === 'measure-progress') {
+    return (
+      <MeasureProgress
+        file={measureFile}
+        onBack={handleBack}
+        onComplete={handleMeasureComplete}
+      />
+    );
+  }
+
+  if (view === 'measure-results') {
+    return (
+      <MeasureResults
+        result={measureResult}
+        onNewAnalysis={handleBack}
+      />
+    );
+  }
+
+  return <LandingPage onAnalyze={handleAnalyze} onMeasure={handleMeasure} />;
 }
 
 export default App;
