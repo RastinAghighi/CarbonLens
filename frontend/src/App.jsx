@@ -1,7 +1,21 @@
-function App() {
+import { useState, useCallback } from 'react';
+import VerifyProgress from './components/VerifyProgress';
+import VerifyResults from './components/VerifyResults';
+
+function LandingPage({ onAnalyze }) {
+  const [companyName, setCompanyName] = useState('');
+
+  function handleAnalyze() {
+    const name = companyName.trim();
+    if (name) onAnalyze(name);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter') handleAnalyze();
+  }
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Main content area — vertically centered */}
       <main className="flex-1 flex flex-col justify-center px-6 py-16">
         <div className="max-w-[1200px] w-full mx-auto">
           {/* Header / Hero */}
@@ -54,9 +68,16 @@ function App() {
                   <input
                     type="text"
                     placeholder="Enter a company name..."
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     className="flex-1 rounded-lg border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#0D9488]/30 focus:border-[#0D9488] transition"
                   />
-                  <button className="rounded-lg bg-[#0D9488] hover:bg-[#0B8278] text-white font-medium px-6 py-2.5 text-sm transition-colors cursor-pointer">
+                  <button
+                    onClick={handleAnalyze}
+                    disabled={!companyName.trim()}
+                    className="rounded-lg bg-[#0D9488] hover:bg-[#0B8278] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium px-6 py-2.5 text-sm transition-colors cursor-pointer"
+                  >
                     Analyze
                   </button>
                 </div>
@@ -157,6 +178,50 @@ function App() {
       </footer>
     </div>
   );
+}
+
+function App() {
+  // State-based routing: 'landing' | 'progress' | 'results'
+  const [view, setView] = useState('landing');
+  const [companyName, setCompanyName] = useState('');
+  const [result, setResult] = useState(null);
+
+  function handleAnalyze(name) {
+    setCompanyName(name);
+    setView('progress');
+  }
+
+  const handleComplete = useCallback((resultData) => {
+    setResult(resultData);
+    setView('results');
+  }, []);
+
+  function handleBack() {
+    setView('landing');
+    setResult(null);
+  }
+
+  if (view === 'progress') {
+    return (
+      <VerifyProgress
+        companyName={companyName}
+        onBack={handleBack}
+        onComplete={handleComplete}
+      />
+    );
+  }
+
+  if (view === 'results') {
+    return (
+      <VerifyResults
+        companyName={companyName}
+        result={result}
+        onNewAnalysis={handleBack}
+      />
+    );
+  }
+
+  return <LandingPage onAnalyze={handleAnalyze} />;
 }
 
 export default App;

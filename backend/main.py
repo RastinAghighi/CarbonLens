@@ -1,8 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from agents.verify.pipeline import create_job, get_job, run_pipeline_in_background
+from agents.measure.pipeline import (
+    create_job as measure_create_job,
+    get_job as measure_get_job,
+    run_pipeline_in_background as measure_run_pipeline,
+)
 
 app = FastAPI(title="CarbonLens", version="0.1.0")
 
@@ -37,6 +42,32 @@ async def start_verify(req: VerifyRequest):
 @app.get("/api/verify/{job_id}")
 async def get_verify_status(job_id: str):
     job = get_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return {
+        "job_id": job["job_id"],
+        "status": job["status"],
+        "current_agent": job["current_agent"],
+        "agents": job["agents"],
+        "result": job["result"],
+    }
+
+
+# ── Measure endpoints ────────────────────────────────────────────────
+
+
+@app.post("/api/measure")
+async def start_measure(file: UploadFile = File(...)):
+    content = await file.read()
+    file_text = content.decode("utf-8", errors="replace")
+    job_id = measure_create_job(file_text)
+    measure_run_pipeline(job_id)
+    return {"job_id": job_id}
+
+
+@app.get("/api/measure/{job_id}")
+async def get_measure_status(job_id: str):
+    job = measure_get_job(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return {
