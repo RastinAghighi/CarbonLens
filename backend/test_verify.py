@@ -1,4 +1,4 @@
-"""End-to-end test: run Verify agents 1-4 on ExxonMobil and print results."""
+"""End-to-end test: run Verify agents 1-5 on ExxonMobil and print results."""
 
 import asyncio
 import sys
@@ -11,6 +11,7 @@ from agents.verify.company_intel import company_intelligence_agent
 from agents.verify.report_extraction import report_extraction_agent
 from agents.verify.independent_data import independent_data_agent
 from agents.verify.cross_reference import cross_reference_agent
+from agents.verify.report_generation import report_generation_agent
 
 
 async def main():
@@ -104,6 +105,28 @@ async def main():
     if limitations:
         print("  DATA LIMITATIONS")
         print(f"    {limitations}")
+    print()
+
+    # ── Agent 5: Report Generation ───────────────────────────────────
+    print("=" * 60)
+    print("AGENT 5: Report Generation")
+    print("=" * 60)
+    state = await report_generation_agent(state)
+    report = state.get("final_report", {})
+
+    # Executive Summary
+    print()
+    print("  EXECUTIVE SUMMARY")
+    print(f"    {report.get('executive_summary', 'N/A')}")
+    print()
+
+    # First two findings narratives
+    narratives = report.get("findings_narrative", [])
+    print(f"  FINDINGS NARRATIVES ({len(narratives)} total, showing first 2)")
+    for fn in narratives[:2]:
+        print(f"    --- [{fn.get('severity', '?').upper()}] {fn.get('title', 'Untitled')} ---")
+        print(f"    {fn.get('narrative', 'N/A')}")
+        print()
 
 
 if __name__ == "__main__":
