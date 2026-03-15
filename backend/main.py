@@ -1,3 +1,10 @@
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Load .env from backend directory before any imports that use env vars (e.g. Anthropic client)
+load_dotenv(Path(__file__).resolve().parent / ".env")
+
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel

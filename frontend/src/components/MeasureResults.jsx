@@ -498,7 +498,7 @@ export default function MeasureResults({ result, onNewAnalysis }) {
       {/* Footer */}
       <footer className="py-6 text-center">
         <p className="text-xs text-[#9CA3AF]">
-          Built with Claude AI &bull; Data from EPA, DEFRA, GHG Protocol &bull; CarbonLens 2026
+          Data from EPA, DEFRA, GHG Protocol &bull; CarbonLens 2026
         </p>
       </footer>
     </div>

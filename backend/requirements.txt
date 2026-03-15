@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 anthropic
+python-dotenv
 python-multipart
 langgraph
 aiofiles
