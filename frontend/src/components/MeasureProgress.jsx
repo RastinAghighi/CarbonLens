@@ -156,7 +156,7 @@ export default function MeasureProgress({ file, onBack, onComplete }) {
         if (data.status === 'complete') {
           clearInterval(pollRef.current);
           clearInterval(timerRef.current);
-          setTimeout(() => onComplete(data.result), 800);
+          setTimeout(() => onComplete(data.result, jobId), 800);
         } else if (data.status === 'error') {
           clearInterval(pollRef.current);
           clearInterval(timerRef.current);

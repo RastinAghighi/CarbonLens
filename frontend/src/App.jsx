@@ -866,32 +866,81 @@ function LandingPage({ onAnalyze, onMeasure }) {
   );
 }
 
-/* ── App (routing unchanged) ── */
+/* ── Detect report route from URL path ── */
+function parseReportRoute(path) {
+  const vm = path.match(/^\/verify\/report\/([a-f0-9]+)/);
+  if (vm) return { type: 'verify', jobId: vm[1] };
+  const mm = path.match(/^\/measure\/report\/([a-f0-9]+)/);
+  if (mm) return { type: 'measure', jobId: mm[1] };
+  return null;
+}
+
+/* ── App ── */
 function App() {
-  const [view, setView] = useState('landing');
+  const initialRoute = parseReportRoute(window.location.pathname);
+
+  const [view, setView] = useState(initialRoute ? 'report-loading' : 'landing');
   const [companyName, setCompanyName] = useState('');
   const [verifyResult, setVerifyResult] = useState(null);
   const [measureFile, setMeasureFile] = useState(null);
   const [measureResult, setMeasureResult] = useState(null);
 
+  // On direct URL load, fetch the persisted report from the backend
+  useEffect(() => {
+    if (view !== 'report-loading' || !initialRoute) return;
+    const { type, jobId } = initialRoute;
+    const endpoint = type === 'verify'
+      ? `${API_BASE}/api/verify/${jobId}`
+      : `${API_BASE}/api/measure/${jobId}`;
+
+    fetch(endpoint)
+      .then(r => { if (!r.ok) throw new Error('not found'); return r.json(); })
+      .then(data => {
+        if (!data.result) { setView('landing'); return; }
+        if (type === 'verify') {
+          setCompanyName(data.company_name || '');
+          setVerifyResult(data.result);
+          setView('verify-results');
+        } else {
+          setMeasureResult(data.result);
+          setView('measure-results');
+        }
+      })
+      .catch(() => {
+        window.history.replaceState({}, '', '/');
+        setView('landing');
+      });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   function handleAnalyze(name) { setCompanyName(name); setView('verify-progress'); }
   function handleMeasure(file) { setMeasureFile(file); setView('measure-progress'); }
 
-  const handleVerifyComplete = useCallback((resultData) => {
+  const handleVerifyComplete = useCallback((resultData, jobId) => {
     setVerifyResult(resultData);
+    if (jobId) window.history.pushState({}, '', `/verify/report/${jobId}`);
     setView('verify-results');
   }, []);
 
-  const handleMeasureComplete = useCallback((resultData) => {
+  const handleMeasureComplete = useCallback((resultData, jobId) => {
     setMeasureResult(resultData);
+    if (jobId) window.history.pushState({}, '', `/measure/report/${jobId}`);
     setView('measure-results');
   }, []);
 
   function handleBack() {
+    window.history.pushState({}, '', '/');
     setView('landing');
     setVerifyResult(null);
     setMeasureFile(null);
     setMeasureResult(null);
+  }
+
+  if (view === 'report-loading') {
+    return (
+      <div style={{ minHeight: '100vh', background: '#050e08', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'rgba(226,245,236,0.5)', fontSize: '0.9rem' }}>Loading report...</p>
+      </div>
+    );
   }
 
   if (view === 'verify-progress') return <VerifyProgress companyName={companyName} onBack={handleBack} onComplete={handleVerifyComplete} />;

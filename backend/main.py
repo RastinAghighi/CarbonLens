@@ -12,6 +12,7 @@ from typing import Optional
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import db
 
 from agents.verify.pipeline import create_job, get_job, run_pipeline_in_background
 from agents.measure.pipeline import (
@@ -22,6 +23,12 @@ from agents.measure.pipeline import (
 
 app = FastAPI(title="CarbonLens", version="0.1.0")
 
+
+@app.on_event("startup")
+async def startup_event():
+    db.init_db()
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,6 +36,68 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Gemini 429 / quota handling ───────────────────────────────────────
+
+def _is_gemini_429_or_quota(exc: BaseException) -> bool:
+    """True if the exception looks like a Gemini 429 / quota / rate-limit error."""
+    msg = (getattr(exc, "message", None) or str(exc)).lower()
+    return (
+        "429" in msg
+        or "resource exhausted" in msg
+        or "resource_exhausted" in msg
+        or "quota" in msg
+        or "rate limit" in msg
+        or "rate_limit" in msg
+    )
+
+
+# Canned fallback answers for landing-page chat when Gemini returns 429.
+_LANDING_429_FALLBACKS = [
+    # (keywords in user message, answer)
+    (
+        ["verify", "what does verify", "verify mode", "what does verify do"],
+        "Verify mode analyzes any company's sustainability claims. You enter a company name; "
+        "CarbonLens cross-references public disclosures, EPA GHGRP data, industry benchmarks, "
+        "and third-party sources to produce a Transparency Score (0–100) with detailed findings.",
+    ),
+    (
+        ["measure", "what does measure", "measure mode", "what does measure do"],
+        "Measure mode calculates your Scope 3 supply chain emissions. Upload a CSV or Excel file "
+        "of procurement or spend data; CarbonLens maps each line to EPA emission factors and "
+        "outputs a full Scope 3 breakdown, supplier rankings, and reduction recommendations.",
+    ),
+    (
+        ["how long", "how fast", "how much time", "analysis take", "how long does"],
+        "Analysis typically completes in a few minutes. CarbonLens runs multiple AI agents in "
+        "parallel and uses public data sources, so you get results without the months-long "
+        "delays of traditional consulting or manual ESG audits.",
+    ),
+    (
+        ["faster", "why carbonlens", "traditional esg", "vs traditional", "quicker"],
+        "CarbonLens is faster than traditional ESG tools because it automates data gathering "
+        "and cross-referencing with AI, uses public EPA and DEFRA data, and runs analysis in "
+        "minutes instead of requiring consultants or manual report reviews.",
+    ),
+]
+
+
+def _landing_canned_reply_for_429(last_user_message: str) -> str | None:
+    """If the last user message matches a common product question, return a canned reply; else None."""
+    if not last_user_message or not last_user_message.strip():
+        return None
+    lower = last_user_message.strip().lower()
+    for keywords, answer in _LANDING_429_FALLBACKS:
+        if any(kw in lower for kw in keywords):
+            return answer
+    return None
+
+
+# User-facing message when Gemini is rate-limited (no canned answer available).
+_GEMINI_429_MESSAGE = (
+    "The AI assistant is temporarily at capacity (rate limit). Please try again in a minute or two."
+)
+
 
 # ── Gemini system prompts ─────────────────────────────────────────────
 
@@ -79,6 +148,8 @@ async def health_check():
 
 
 # ── AI Chat endpoint ──────────────────────────────────────────────────
+# NOTE: POST /api/chat must be deployed for Verify AI Analyst and landing
+# guide to work. If you see 404 in production, redeploy the backend.
 
 
 class ChatMessage(BaseModel):
@@ -166,6 +237,7 @@ async def get_verify_status(job_id: str):
         raise HTTPException(status_code=404, detail="Job not found")
     return {
         "job_id": job["job_id"],
+        "company_name": job.get("company_name"),
         "status": job["status"],
         "current_agent": job["current_agent"],
         "agents": job["agents"],

@@ -171,9 +171,54 @@ function SupplierRow({ supplier, rank, isTop3, isExpanded, onToggle }) {
   );
 }
 
+function normalizeMeasureResult(result) {
+  if (!result || typeof result !== 'object') return null;
+  if (result.total_emissions != null && result.category_breakdown) return result;
+  const summary = result.summary || {};
+  const total_tco2e = summary.total_scope3_tco2e ?? result.total_emissions ?? 0;
+  const line_count = summary.line_items_processed ?? summary.line_items_calculated ?? result.line_items_count ?? 0;
+  const byCat = result.by_scope3_category || [];
+  const bySupp = result.by_supplier || [];
+  return {
+    total_emissions: total_tco2e,
+    line_items_count: line_count,
+    confidence: result.confidence || 'Medium',
+    equivalence: result.equivalence ?? null,
+    category_breakdown: byCat.map((c) => ({
+      name: c.category_name || `Category ${c.category_number || ''}`,
+      emissions: (c.emissions_kgco2e ?? 0) / 1000,
+      percentage: c.percent_of_total ?? 0,
+    })),
+    supplier_ranking: bySupp.map((s) => ({
+      name: s.supplier_name || 'Unknown',
+      total_emissions: (s.total_emissions_kgco2e ?? 0) / 1000,
+      spend: s.total_spend_usd,
+      emission_intensity: s.emission_intensity_kgco2e_per_usd,
+      percentage_of_total: s.percent_of_total ?? 0,
+      line_items: [],
+    })),
+    hotspots: result.hotspots || [],
+    recommendations: (result.recommendations || []).map((r) => {
+      const p = r.priority;
+      const priorityLabel = typeof p === 'number' ? (p <= 2 ? 'High' : p <= 3 ? 'Medium' : 'Low') : (p ? String(p).charAt(0).toUpperCase() + String(p).slice(1).toLowerCase() : 'Medium');
+      return {
+        priority: priorityLabel,
+        target: r.target,
+        recommendation: r.recommendation || '',
+        potential_reduction: r.potential_reduction_percent ?? r.potential_reduction,
+        difficulty: r.difficulty,
+        timeframe: r.timeframe,
+      };
+    }),
+    data_quality: result.data_quality_summary ?? result.data_quality ?? null,
+    unclassified_items: result.unclassified_items || [],
+  };
+}
+
 export default function MeasureResults({ result, onNewAnalysis }) {
   const [expandedSupplier, setExpandedSupplier] = useState(null);
 
+  const normalized = normalizeMeasureResult(result);
   const {
     total_emissions = 0,
     line_items_count = 0,
@@ -185,7 +230,7 @@ export default function MeasureResults({ result, onNewAnalysis }) {
     recommendations = [],
     data_quality = null,
     unclassified_items = [],
-  } = result || {};
+  } = normalized || {};
 
   const sortedCategories = [...category_breakdown].sort((a, b) => b.emissions - a.emissions);
   const maxCategoryPct = sortedCategories.length > 0 ? sortedCategories[0].percentage : 1;

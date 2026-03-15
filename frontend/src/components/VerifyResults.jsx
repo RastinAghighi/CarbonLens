@@ -30,27 +30,28 @@ function DarkTooltip({ active, payload, label, unit = '' }) {
 
 /* ─── Build chart datasets from _raw ───────────────────────────── */
 function buildCharts(raw) {
-  if (!raw) return {};
+  if (!raw) return { scoreBreakdown: [], ghgrpTrend: [], topFacilities: [], claimsByCategory: [], emissionsComparison: [], benchmark: [], quickFacts: [] };
   const { company_profile, claims_extracted, independent_data, cross_reference_analysis } = raw;
+  const ghgrpProfile = company_profile?.ghgrp_data || company_profile || {};
 
-  // Score breakdown radar
+  // Score breakdown radar (support both breakdown.verifiability and breakdown.verification)
   const ts = cross_reference_analysis?.transparency_score || {};
   const bd = ts.breakdown || {};
   const scoreBreakdown = [
-    { subject: 'Completeness', score: bd.completeness || 0, fullMark: 100 },
-    { subject: 'Consistency', score: bd.consistency || 0, fullMark: 100 },
-    { subject: 'Ambition', score: bd.ambition || 0, fullMark: 100 },
-    { subject: 'Verification', score: bd.verifiability || 0, fullMark: 100 },
+    { subject: 'Completeness', score: bd.completeness ?? 0, fullMark: 100 },
+    { subject: 'Consistency', score: bd.consistency ?? 0, fullMark: 100 },
+    { subject: 'Ambition', score: bd.ambition ?? 0, fullMark: 100 },
+    { subject: 'Verification', score: bd.verifiability ?? bd.verification ?? 0, fullMark: 100 },
   ];
 
-  // GHGRP yearly trend
-  const yearlyRaw = company_profile?.ghgrp_data?.yearly_totals_mtco2e || {};
+  // GHGRP yearly trend (support both ghgrp_data and top-level company_profile)
+  const yearlyRaw = ghgrpProfile.yearly_totals_mtco2e || company_profile?.yearly_totals_mtco2e || {};
   const ghgrpTrend = Object.entries(yearlyRaw)
     .map(([yr, val]) => ({ year: yr, emissions: +(+val).toFixed(0) }))
     .sort((a, b) => +a.year - +b.year);
 
   // Top facilities
-  const topFacilities = (company_profile?.ghgrp_data?.top_facilities || [])
+  const topFacilities = (ghgrpProfile.top_facilities || company_profile?.top_facilities || [])
     .slice(0, 6)
     .map(f => ({
       name: (f.facility_name || f.name || 'Facility').split(' ').slice(0, 3).join(' '),
@@ -69,15 +70,15 @@ function buildCharts(raw) {
 
   // Emissions comparison (scope 1+2 estimated vs scope 3 estimated)
   const est = independent_data?.emission_estimates || {};
-  const ghgrp = independent_data?.ghgrp_emissions || {};
+  const ghgrpEmissions = independent_data?.ghgrp_emissions || {};
   const emissionsComparison = [];
-  if (ghgrp.available && ghgrp.total_emissions_mtco2e > 0)
-    emissionsComparison.push({ name: 'EPA GHGRP', value: +(+ghgrp.total_emissions_mtco2e).toFixed(0), fill: '#10B981' });
+  if (ghgrpEmissions.available && ghgrpEmissions.total_emissions_mtco2e > 0)
+    emissionsComparison.push({ name: 'EPA GHGRP', value: +(+ghgrpEmissions.total_emissions_mtco2e).toFixed(0), fill: '#10B981' });
   if (est.available) {
-    if (est.estimated_scope_1_2 > 0)
-      emissionsComparison.push({ name: 'Est. Scope 1+2', value: +est.estimated_scope_1_2.toFixed(0), fill: '#34D399' });
-    if (est.estimated_scope_3 > 0)
-      emissionsComparison.push({ name: 'Est. Scope 3', value: +est.estimated_scope_3.toFixed(0), fill: '#F59E0B' });
+    if (est.estimated_scope1_2_mtco2e > 0)
+      emissionsComparison.push({ name: 'Est. Scope 1+2', value: +est.estimated_scope1_2_mtco2e.toFixed(0), fill: '#34D399' });
+    if (est.estimated_scope3_mtco2e > 0)
+      emissionsComparison.push({ name: 'Est. Scope 3', value: +est.estimated_scope3_mtco2e.toFixed(0), fill: '#F59E0B' });
   }
 
   // Industry benchmark
@@ -185,7 +186,7 @@ function DashboardView({ result, charts }) {
           />
           <MetricCard
             label="Total Est. Emissions"
-            value={est.total_estimated ? `${(est.total_estimated / 1000).toFixed(0)}K` : '—'}
+            value={est.estimated_total_mtco2e ? `${(est.estimated_total_mtco2e / 1000).toFixed(0)}K` : '—'}
             sub="tCO₂e (revenue-based)" color="#F59E0B"
           />
         </div>
@@ -364,13 +365,20 @@ function AIAnalystView({ result, companyName }) {
     setMessages(next);
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/chat`, {
+      const url = `${API_BASE}/api/chat`;
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: next, context: 'report', report_data: result }),
       });
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply || 'No response.' }]);
+      let data = {};
+      if (res.ok) {
+        try {
+          data = await res.json();
+        } catch (_) {}
+      }
+      const reply = data.reply || (res.status === 404 ? 'Chat endpoint not available. Ensure the backend is deployed with POST /api/chat.' : 'No response.');
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Could not reach the AI analyst.' }]);
     } finally {
@@ -578,7 +586,9 @@ function SubScoreBar({ label, score }) {
 
 function ReportSections({ result }) {
   if (!result) return null;
-  const { executive_summary, findings = [], positive_observations = [], estimation_comparison, data_gaps = [], methodology } = result;
+  const { executive_summary, findings = [], positive_observations = [], estimation_comparison, methodology } = result;
+  const rawGaps = result.data_gaps;
+  const data_gaps = Array.isArray(rawGaps) ? rawGaps : [];
   return (
     <>
       {executive_summary && (
@@ -661,12 +671,15 @@ function ReportSections({ result }) {
       {data_gaps.length > 0 && (
         <Accordion title="Data Gaps" badge={data_gaps.length}>
           <ul style={{ display: 'flex', flexDirection: 'column', gap: '8px', listStyle: 'none', padding: 0, margin: 0 }}>
-            {data_gaps.map((gap, i) => (
-              <li key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#F59E0B', marginTop: '7px', flexShrink: 0 }} />
-                <span style={{ fontSize: '0.875rem', color: 'rgba(226,245,236,0.6)', lineHeight: 1.6 }}>{gap}</span>
-              </li>
-            ))}
+            {data_gaps.map((gap, i) => {
+              const label = typeof gap === 'string' ? gap : (gap && typeof gap === 'object' && gap.gap != null ? String(gap.gap) : String(gap ?? ''));
+              return (
+                <li key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#F59E0B', marginTop: '7px', flexShrink: 0 }} />
+                  <span style={{ fontSize: '0.875rem', color: 'rgba(226,245,236,0.6)', lineHeight: 1.6 }}>{label}</span>
+                </li>
+              );
+            })}
           </ul>
         </Accordion>
       )}
@@ -686,7 +699,6 @@ function ReportSections({ result }) {
 export default function VerifyResults({ companyName, result, onNewAnalysis }) {
   const [mode, setMode] = useState('dashboard');
   const charts = buildCharts(result?._raw);
-
   const scoreColor = (result?.transparency_score ?? 0) >= 80 ? '#34D399'
     : (result?.transparency_score ?? 0) >= 60 ? '#10B981'
     : (result?.transparency_score ?? 0) >= 40 ? '#F59E0B'

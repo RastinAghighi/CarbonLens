@@ -41,7 +41,12 @@ def create_job(company_name: str) -> str:
 
 
 def get_job(job_id: str) -> dict | None:
-    return _jobs.get(job_id)
+    job = _jobs.get(job_id)
+    if job is not None:
+        return job
+    # Fall back to SQLite for completed jobs (survives restarts / direct URL loads)
+    import db
+    return db.load_job("verify", job_id)
 
 
 async def _run_pipeline(job_id: str) -> None:
@@ -63,6 +68,9 @@ async def _run_pipeline(job_id: str) -> None:
 
         job["status"] = "complete"
         job["result"] = _normalize_result(state)
+        # Persist to SQLite so the report survives server restarts
+        import db
+        db.save_job("verify", job_id, job["result"], job["company_name"])
 
     except Exception as e:
         current = job["current_agent"] - 1
@@ -95,9 +103,32 @@ def _normalize_result(state: dict) -> dict:
     names expected by the frontend, and includes raw agent data for the
     dashboard charts.
     """
+    import re
     final = state.get("final_report", {})
     cross_ref = state.get("cross_reference_analysis", {})
-    ts = cross_ref.get("transparency_score", {})
+    ts_raw = cross_ref.get("transparency_score", {})
+    # ts_raw may be a dict with various key names, or a raw number
+    if isinstance(ts_raw, (int, float)):
+        transparency_score_value = int(ts_raw)
+        ts = {}
+    else:
+        ts = ts_raw if isinstance(ts_raw, dict) else {}
+        raw_score = (
+            ts.get("overall")
+            or ts.get("score")
+            or ts.get("overall_score")
+            or 0
+        )
+        try:
+            transparency_score_value = int(raw_score) if raw_score is not None else 0
+        except (TypeError, ValueError):
+            transparency_score_value = 0
+    # Fallback: if score still 0 but executive summary mentions "XX/100", use it so UI matches narrative
+    if transparency_score_value == 0 and final.get("executive_summary"):
+        summary = final.get("executive_summary", "")
+        match = re.search(r"\b(\d{1,3})\s*/\s*100\b", summary)
+        if match:
+            transparency_score_value = max(0, min(100, int(match.group(1))))
     breakdown = ts.get("breakdown", {})
     company_profile = state.get("company_profile", {})
     claims = state.get("claims_extracted", [])
@@ -120,23 +151,33 @@ def _normalize_result(state: dict) -> dict:
         for note in final.get("positive_notes", [])
     ]
 
-    # Normalize data_gaps (final_report returns list of {gap, reason, impact})
-    data_gaps = [
-        g["gap"] if isinstance(g, dict) else str(g)
-        for g in final.get("data_gaps", [])
-    ]
+    # Normalize data_gaps (final_report returns list of {gap, reason, impact}); safe for missing keys
+    _raw_gaps = final.get("data_gaps") or []
+    if not isinstance(_raw_gaps, list):
+        _raw_gaps = []
+    data_gaps = []
+    for g in _raw_gaps:
+        try:
+            data_gaps.append(g.get("gap", str(g)) if isinstance(g, dict) else str(g))
+        except Exception:
+            data_gaps.append(str(g) if g is not None else "Unknown gap")
 
     # Build estimation_comparison from independent_data
     emission_estimates = indep.get("emission_estimates", {})
     ghgrp_emissions = indep.get("ghgrp_emissions", {})
     estimation_comparison = None
-    if emission_estimates.get("available") and emission_estimates.get("total_estimated", 0) > 0:
+    estimated_total = float(
+        emission_estimates.get("estimated_total_mtco2e")
+        or emission_estimates.get("total_estimated")
+        or 0
+    )
+    if emission_estimates.get("available") and estimated_total > 0:
         reported = 0.0
         if ghgrp_emissions.get("available") and ghgrp_emissions.get("total_emissions_mtco2e", 0) > 0:
             reported = float(ghgrp_emissions["total_emissions_mtco2e"])
         estimation_comparison = {
             "reported_total": reported,
-            "estimated_total": float(emission_estimates.get("total_estimated", 0)),
+            "estimated_total": estimated_total,
             "gap_explanation": (
                 "The gap between EPA-reported facility emissions and the independent "
                 "revenue-based estimate reflects unreported or unverified supply chain "
@@ -146,7 +187,7 @@ def _normalize_result(state: dict) -> dict:
 
     return {
         # Scores from cross_reference_analysis
-        "transparency_score": ts.get("overall", 0),
+        "transparency_score": transparency_score_value,
         "sub_scores": {
             "data_completeness": breakdown.get("completeness", 0),
             "consistency": breakdown.get("consistency", 0),

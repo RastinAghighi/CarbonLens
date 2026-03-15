@@ -434,7 +434,7 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
           clearInterval(timerRef.current);
           clearInterval(thoughtRef.current);
           addFeedEntry('Report generation complete - loading results...', 'complete');
-          setTimeout(() => onComplete(data.result), 900);
+          setTimeout(() => onComplete(data.result, jobId), 900);
         } else if (data.status === 'error') {
           clearInterval(pollRef.current);
           clearInterval(timerRef.current);
