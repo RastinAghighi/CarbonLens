@@ -377,7 +377,10 @@ function AIAnalystView({ result, companyName }) {
           data = await res.json();
         } catch (_) {}
       }
-      const reply = data.reply || (res.status === 404 ? 'Chat endpoint not available. Ensure the backend is deployed with POST /api/chat.' : 'No response.');
+      let reply = data.reply || (res.status === 404 ? 'Chat endpoint not available. Ensure the backend is deployed with POST /api/chat.' : 'No response.');
+      if (typeof reply === 'string' && reply.startsWith('Assistant error:') && /429|quota|rate limit|resource exhausted/i.test(reply)) {
+        reply = 'The AI assistant is temporarily at capacity (rate limit). Please try again in a minute or two.';
+      }
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Could not reach the AI analyst.' }]);

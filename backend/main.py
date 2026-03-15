@@ -213,6 +213,12 @@ async def chat_endpoint(req: ChatRequest):
         return {"reply": response.text}
 
     except Exception as e:
+        if _is_gemini_429_or_quota(e):
+            if req.context == "landing" and req.messages:
+                canned = _landing_canned_reply_for_429(req.messages[-1].content)
+                if canned:
+                    return {"reply": canned}
+            return {"reply": _GEMINI_429_MESSAGE}
         return {"reply": f"Assistant error: {str(e)}"}
 
 

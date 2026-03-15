@@ -681,7 +681,11 @@ function LandingAssistantSection() {
         body: JSON.stringify({ messages: next, context: 'landing' }),
       });
       const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply || 'No response.' }]);
+      let reply = data.reply || 'No response.';
+      if (typeof reply === 'string' && reply.startsWith('Assistant error:') && /429|quota|rate limit|resource exhausted/i.test(reply)) {
+        reply = 'The AI assistant is temporarily at capacity (rate limit). Please try again in a minute or two.';
+      }
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Could not reach the assistant right now.' }]);
     } finally {
