@@ -1,4 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  'https://carbonlens-backend-592028248398.us-central1.run.app';
 import VerifyProgress from './components/VerifyProgress';
 import VerifyResults from './components/VerifyResults';
 import MeasureProgress from './components/MeasureProgress';
@@ -562,130 +566,7 @@ function DashboardPreview() {
   ];
 
   return (
-    <section style={{ position: 'relative', zIndex: 1, padding: '0 2rem 100px' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '52px' }}>
-          <p style={{ color: '#10B981', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px' }}>
-            Sample Output
-          </p>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 700, letterSpacing: '-0.02em', color: '#e2f5ec' }}>
-            Intelligence you can act on
-          </h2>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '20px', alignItems: 'start' }}>
-          {/* Verify result preview */}
-          <div className="glass-strong" style={{ borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #10B981, transparent)' }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 8px #10B981' }} />
-              <p style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.5)', fontWeight: 500 }}>Verify Mode - Sample Report</p>
-            </div>
-
-            <p style={{ fontSize: '1rem', fontWeight: 600, color: '#e2f5ec', marginBottom: '4px' }}>Patagonia, Inc.</p>
-            <p style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.4)', marginBottom: '24px' }}>Apparel & Outdoor Equipment</p>
-
-            {/* Score */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
-              <div style={{
-                width: '80px', height: '80px', borderRadius: '50%',
-                border: '3px solid #10B981',
-                boxShadow: '0 0 20px rgba(16,185,129,0.3)',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#34D399', lineHeight: 1 }}>82</span>
-                <span style={{ fontSize: '0.6rem', color: 'rgba(226,245,236,0.4)' }}>/100</span>
-              </div>
-              <div>
-                <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#34D399' }}>High Transparency</p>
-                <p style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.45)', marginTop: '4px' }}>Strong evidence across 4 of 5 categories</p>
-              </div>
-            </div>
-
-            {/* Sub scores */}
-            {[
-              { label: 'Emissions Reporting', score: 88 },
-              { label: 'Supply Chain', score: 74 },
-              { label: 'Third-party Verification', score: 91 },
-            ].map(s => (
-              <div key={s.label} style={{ marginBottom: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                  <span style={{ fontSize: '0.78rem', color: 'rgba(226,245,236,0.55)' }}>{s.label}</span>
-                  <span style={{ fontSize: '0.78rem', color: '#34D399', fontWeight: 600 }}>{s.score}</span>
-                </div>
-                <div style={{ height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.06)' }}>
-                  <div style={{ height: '100%', width: `${s.score}%`, borderRadius: '2px', background: 'linear-gradient(90deg, #059669, #34D399)', boxShadow: '0 0 6px rgba(52,211,153,0.3)' }} />
-                </div>
-              </div>
-            ))}
-
-            {/* Finding badges */}
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '16px' }}>
-              {[
-                { text: '✓ CDP Verified', color: '#10B981' },
-                { text: '✓ Science-Based Target', color: '#10B981' },
-                { text: '⚠ Scope 3 partial', color: '#F59E0B' },
-              ].map(b => (
-                <span key={b.text} style={{
-                  fontSize: '0.68rem', padding: '3px 8px', borderRadius: '4px', fontWeight: 500,
-                  background: `${b.color}18`, border: `1px solid ${b.color}30`, color: b.color,
-                }}>{b.text}</span>
-              ))}
-            </div>
-          </div>
-
-          {/* Measure result preview */}
-          <div className="glass-strong" style={{ borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #34D399, transparent)' }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34D399', boxShadow: '0 0 8px #34D399' }} />
-              <p style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.5)', fontWeight: 500 }}>Measure Mode - Sample Report</p>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-              <div>
-                <p style={{ fontSize: '1rem', fontWeight: 600, color: '#e2f5ec', marginBottom: '4px' }}>procurement_2024.csv</p>
-                <p style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.4)' }}>342 line items · 18 categories</p>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: '1.6rem', fontWeight: 800, color: '#34D399', lineHeight: 1 }}>19,610</p>
-                <p style={{ fontSize: '0.72rem', color: 'rgba(226,245,236,0.4)' }}>tCO₂e total</p>
-              </div>
-            </div>
-
-            <p style={{ fontSize: '0.75rem', color: 'rgba(226,245,236,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Emissions by Category</p>
-            {categories.map(cat => (
-              <div key={cat.name} style={{ marginBottom: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                  <span style={{ fontSize: '0.82rem', color: 'rgba(226,245,236,0.65)' }}>{cat.name}</span>
-                  <span style={{ fontSize: '0.78rem', color: '#34D399', fontWeight: 600 }}>{cat.tco2} tCO₂e</span>
-                </div>
-                <div style={{ height: '5px', borderRadius: '3px', background: 'rgba(255,255,255,0.05)' }}>
-                  <div style={{
-                    height: '100%', width: `${cat.value}%`, borderRadius: '3px',
-                    background: `linear-gradient(90deg, #059669, #34D399)`,
-                    boxShadow: '0 0 6px rgba(52,211,153,0.25)',
-                    transition: 'width 1s ease',
-                  }} />
-                </div>
-              </div>
-            ))}
-
-            {/* Top supplier */}
-            <div style={{
-              marginTop: '20px', padding: '12px 14px', borderRadius: '10px',
-              background: 'rgba(245, 158, 11, 0.07)', border: '1px solid rgba(245,158,11,0.15)',
-            }}>
-              <p style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 600, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Top Priority Supplier</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <p style={{ fontSize: '0.875rem', color: '#e2f5ec', fontWeight: 500 }}>Global Logistics Co.</p>
-                <p style={{ fontSize: '0.82rem', color: '#F59E0B', fontWeight: 600 }}>4,120 tCO₂e</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <></>
   );
 }
 
@@ -761,6 +642,205 @@ function Footer() {
   );
 }
 
+/* ── Landing AI Assistant ── */
+const GUIDE_CHIPS = [
+  { label: 'What does Verify do?', q: 'What does Verify mode do and what does it output?' },
+  { label: 'What can I upload?', q: 'What file formats can I upload in Measure mode, and what should the data look like?' },
+  { label: 'How is the score calculated?', q: 'How does CarbonLens calculate a company\'s transparency score?' },
+  { label: 'What is Scope 3?', q: 'What is Scope 3 emissions and why does it matter for supply chains?' },
+  { label: 'How fast is it?', q: 'How long does an analysis take and what makes CarbonLens faster than traditional ESG tools?' },
+];
+
+function LandingAssistantSection() {
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      content: "Hi! I'm the CarbonLens product guide. Ask me anything about how Verify or Measure mode works, what to expect from an analysis, or what data you need to get started.",
+    },
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // useEffect(() => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // }, [messages]);
+
+  async function send(text) {
+    const userText = (text || input).trim();
+    if (!userText || loading) return;
+    setInput('');
+    const next = [...messages, { role: 'user', content: userText }];
+    setMessages(next);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: next, context: 'landing' }),
+      });
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply || 'No response.' }]);
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Could not reach the assistant right now.' }]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section style={{ position: 'relative', zIndex: 1, padding: '0 2rem 100px' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,rgba(16,185,129,0.2),transparent)', marginBottom: '80px' }} />
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <p style={{ color: '#10B981', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px' }}>
+            Product Guide
+          </p>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 700, letterSpacing: '-0.02em', color: '#e2f5ec' }}>
+            Have questions? Ask the AI guide.
+          </h2>
+        </div>
+
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 380px', gap: '24px', alignItems: 'start',
+        }}>
+          {/* Left: chips + info */}
+          <div>
+            <div style={{
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '20px', padding: '28px', marginBottom: '16px',
+            }}>
+              <p style={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(226,245,236,0.4)', marginBottom: '16px' }}>
+                Common questions
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {GUIDE_CHIPS.map(chip => (
+                  <button key={chip.label} onClick={() => send(chip.q)} style={{
+                    background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.18)',
+                    borderRadius: '999px', padding: '8px 16px',
+                    fontSize: '0.82rem', color: '#34D399', cursor: 'pointer', fontWeight: 500,
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.14)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.35)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.07)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.18)'; }}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Two feature cards */}
+            {[
+              { icon: '🔍', title: 'Verify Mode', desc: 'Enter any company name. CarbonLens runs 5 AI agents to cross-reference EPA data, sustainability reports, and benchmarks — producing a 0–100 Transparency Score with evidence-backed findings.' },
+              { icon: '📊', title: 'Measure Mode', desc: 'Upload a CSV or Excel of procurement spend. CarbonLens maps every line item to EPA DEFRA emission factors and returns Scope 3 totals by category, supplier rankings, and reduction opportunities.' },
+            ].map(card => (
+              <div key={card.title} style={{
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '16px', padding: '22px 24px', marginBottom: '12px',
+                display: 'flex', gap: '16px', alignItems: 'flex-start',
+              }}>
+                <span style={{ fontSize: '1.4rem', marginTop: '2px' }}>{card.icon}</span>
+                <div>
+                  <p style={{ fontSize: '0.95rem', fontWeight: 700, color: '#e2f5ec', marginBottom: '6px' }}>{card.title}</p>
+                  <p style={{ fontSize: '0.84rem', color: 'rgba(226,245,236,0.5)', lineHeight: 1.65 }}>{card.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Right: chat panel */}
+          <div style={{ position: 'sticky', top: '88px' }}>
+            <div style={{
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '20px', overflow: 'hidden',
+            }}>
+              {/* Header */}
+              <div style={{
+                padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)',
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: 'rgba(16,185,129,0.04)',
+              }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'linear-gradient(135deg,#10B981,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} style={{ width: '13px', height: '13px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                  </svg>
+                </div>
+                <div>
+                  <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#e2f5ec' }}>CarbonLens Guide</p>
+                  <p style={{ fontSize: '0.7rem', color: '#10B981' }}>Powered by Gemini</p>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div style={{ padding: '16px', maxHeight: '340px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {messages.map((m, i) => (
+                  <div key={i} style={{
+                    display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start',
+                    animation: 'fade-up 0.3s ease-out',
+                  }}>
+                    <div style={{
+                      maxWidth: '88%', padding: '10px 14px', borderRadius: '12px',
+                      fontSize: '0.84rem', lineHeight: 1.6,
+                      background: m.role === 'user'
+                        ? 'rgba(16,185,129,0.15)'
+                        : 'rgba(255,255,255,0.05)',
+                      border: m.role === 'user'
+                        ? '1px solid rgba(16,185,129,0.25)'
+                        : '1px solid rgba(255,255,255,0.07)',
+                      color: m.role === 'user' ? '#34D399' : 'rgba(226,245,236,0.75)',
+                    }}>
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div style={{ display: 'flex', gap: '4px', paddingLeft: '4px', alignItems: 'center' }}>
+                    {[0,1,2].map(i => (
+                      <div key={i} style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#10B981', animation: `bounce-dot 1.2s ease-in-out ${i*0.15}s infinite` }} />
+                    ))}
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input */}
+              <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: '8px' }}>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && send()}
+                  placeholder="Ask anything about CarbonLens..."
+                  style={{
+                    flex: 1, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px', padding: '9px 12px', fontSize: '0.84rem', color: '#e2f5ec',
+                    outline: 'none',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = 'rgba(16,185,129,0.4)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                />
+                <button onClick={() => send()} disabled={!input.trim() || loading} style={{
+                  width: '36px', height: '36px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                  background: input.trim() ? 'linear-gradient(135deg,#10B981,#059669)' : 'rgba(255,255,255,0.06)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s',
+                  flexShrink: 0,
+                }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} style={{ width: '14px', height: '14px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── Landing Page ── */
 function LandingPage({ onAnalyze, onMeasure }) {
   const modesRef = useRef(null);
@@ -779,6 +859,7 @@ function LandingPage({ onAnalyze, onMeasure }) {
       <HowItWorks />
       <StatsSection />
       <DashboardPreview />
+      <LandingAssistantSection />
       <CTASection onScrollToModes={scrollToModes} />
       <Footer />
     </div>

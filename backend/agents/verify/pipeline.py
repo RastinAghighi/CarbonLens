@@ -62,7 +62,7 @@ async def _run_pipeline(job_id: str) -> None:
             job["agents"][i]["message"] = _agent_summary(i, state)
 
         job["status"] = "complete"
-        job["result"] = state.get("final_report", state)
+        job["result"] = _normalize_result(state)
 
     except Exception as e:
         current = job["current_agent"] - 1
@@ -86,6 +86,92 @@ def run_pipeline_in_background(job_id: str) -> None:
 
     t = threading.Thread(target=_thread_target, daemon=True)
     t.start()
+
+
+def _normalize_result(state: dict) -> dict:
+    """Assemble a normalized result dict from the full pipeline state.
+
+    Merges final_report fields with cross_reference scores, normalizes field
+    names expected by the frontend, and includes raw agent data for the
+    dashboard charts.
+    """
+    final = state.get("final_report", {})
+    cross_ref = state.get("cross_reference_analysis", {})
+    ts = cross_ref.get("transparency_score", {})
+    breakdown = ts.get("breakdown", {})
+    company_profile = state.get("company_profile", {})
+    claims = state.get("claims_extracted", [])
+    indep = state.get("independent_data", {})
+
+    # Normalize findings (final_report uses 'findings_narrative')
+    findings = [
+        {
+            "title": f.get("title", ""),
+            "severity": f.get("severity", "medium").upper(),
+            "narrative": f.get("narrative", ""),
+            "evidence": [],
+        }
+        for f in final.get("findings_narrative", [])
+    ]
+
+    # Normalize positive observations (final_report uses 'positive_notes' list of strings)
+    positive_observations = [
+        {"title": note, "description": ""}
+        for note in final.get("positive_notes", [])
+    ]
+
+    # Normalize data_gaps (final_report returns list of {gap, reason, impact})
+    data_gaps = [
+        g["gap"] if isinstance(g, dict) else str(g)
+        for g in final.get("data_gaps", [])
+    ]
+
+    # Build estimation_comparison from independent_data
+    emission_estimates = indep.get("emission_estimates", {})
+    ghgrp_emissions = indep.get("ghgrp_emissions", {})
+    estimation_comparison = None
+    if emission_estimates.get("available") and emission_estimates.get("total_estimated", 0) > 0:
+        reported = 0.0
+        if ghgrp_emissions.get("available") and ghgrp_emissions.get("total_emissions_mtco2e", 0) > 0:
+            reported = float(ghgrp_emissions["total_emissions_mtco2e"])
+        estimation_comparison = {
+            "reported_total": reported,
+            "estimated_total": float(emission_estimates.get("total_estimated", 0)),
+            "gap_explanation": (
+                "The gap between EPA-reported facility emissions and the independent "
+                "revenue-based estimate reflects unreported or unverified supply chain "
+                "emissions (Scope 3 'dark matter')."
+            ),
+        }
+
+    return {
+        # Scores from cross_reference_analysis
+        "transparency_score": ts.get("overall", 0),
+        "sub_scores": {
+            "data_completeness": breakdown.get("completeness", 0),
+            "consistency": breakdown.get("consistency", 0),
+            "ambition": breakdown.get("ambition", 0),
+            "verification": breakdown.get("verifiability", 0),
+        },
+        # Company metadata
+        "industry": company_profile.get("industry", ""),
+        # Narrative fields from final_report
+        "executive_summary": final.get("executive_summary", ""),
+        "score_context": final.get("score_context", {}),
+        "methodology": final.get("methodology", ""),
+        # Normalized collections
+        "findings": findings,
+        "positive_observations": positive_observations,
+        "data_gaps": data_gaps,
+        "estimation_comparison": estimation_comparison,
+        # Raw agent outputs for dashboard charts
+        "_raw": {
+            "company_profile": company_profile,
+            "claims_extracted": claims,
+            "independent_data": indep,
+            "cross_reference_analysis": cross_ref,
+        },
+    }
 
 
 def _agent_summary(agent_index: int, state: dict) -> str:

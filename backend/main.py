@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 # Load .env from backend directory before any imports that use env vars (e.g. Anthropic client)
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
+import json
+import os
+from typing import Optional
+
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -20,16 +24,125 @@ app = FastAPI(title="CarbonLens", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Gemini system prompts ─────────────────────────────────────────────
+
+_LANDING_SYSTEM = """\
+You are the CarbonLens product guide — a concise, friendly assistant helping \
+users understand CarbonLens, an AI-powered supply chain emissions intelligence \
+platform.
+
+CarbonLens has two modes:
+1. **Verify** — Analyzes any company's sustainability claims. The user enters \
+a company name; CarbonLens cross-references public disclosures, EPA GHGRP \
+facility data, industry benchmarks, and third-party sources to produce a \
+Transparency Score (0–100) with detailed findings.
+2. **Measure** — Calculates your own Scope 3 supply chain emissions. Upload a \
+CSV or Excel file of procurement/spend data; CarbonLens maps each line item to \
+EPA emission factors and outputs a full Scope 3 breakdown, supplier rankings, \
+and reduction recommendations.
+
+Key facts:
+- No consultants or $50K enterprise contracts needed
+- Results in minutes, not months
+- EPA GHGRP, DEFRA, GHG Protocol emission factors used
+- Greenwashing detection built in
+
+Answer questions briefly (2-4 sentences). Be practical and specific.\
+"""
+
+_ANALYST_SYSTEM_BASE = """\
+You are the CarbonLens AI Analyst — an expert in corporate sustainability, \
+ESG reporting, and climate disclosure analysis. You have been given a \
+structured ESG transparency analysis report.
+
+Your role: help users understand the analysis by answering questions clearly \
+and concisely in plain language.
+
+Guidelines:
+- Be direct — cite specific numbers, scores, and findings from the report
+- Explain jargon briefly when needed (e.g., "Scope 3 = supply chain emissions")
+- Be balanced — acknowledge both strengths and concerns
+- Keep responses focused (3-5 sentences, or a short list when appropriate)
+- If asked about something not in the report, say so clearly\
+"""
 
 
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "service": "CarbonLens"}
+
+
+# ── AI Chat endpoint ──────────────────────────────────────────────────
+
+
+class ChatMessage(BaseModel):
+    role: str   # "user" | "assistant"
+    content: str
+
+
+class ChatRequest(BaseModel):
+    messages: list[ChatMessage]
+    context: str = "landing"          # "landing" | "report"
+    report_data: Optional[dict] = None
+
+
+@app.post("/api/chat")
+async def chat_endpoint(req: ChatRequest):
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return {"reply": "AI assistant is not configured (GEMINI_API_KEY missing)."}
+
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+
+        # Build system instruction
+        if req.context == "report" and req.report_data:
+            # Condense report data to keep prompt size manageable
+            compact = {k: v for k, v in req.report_data.items() if k != "_raw"}
+            raw = req.report_data.get("_raw", {})
+            compact["_summary"] = {
+                "claims_count": len(raw.get("claims_extracted", [])),
+                "ghgrp_available": raw.get("independent_data", {}).get("ghgrp_emissions", {}).get("available"),
+                "cdp_score": raw.get("independent_data", {}).get("news_and_third_party", {}).get("cdp_score"),
+                "sbt_status": raw.get("independent_data", {}).get("news_and_third_party", {}).get("science_based_targets", {}).get("status"),
+                "top_facilities": raw.get("company_profile", {}).get("ghgrp_data", {}).get("top_facilities", [])[:3],
+                "benchmark_sector": raw.get("independent_data", {}).get("industry_benchmark", {}).get("sector"),
+                "controversies": raw.get("independent_data", {}).get("news_and_third_party", {}).get("controversies", []),
+            }
+            system_instruction = (
+                _ANALYST_SYSTEM_BASE
+                + "\n\n## Report Data\n```json\n"
+                + json.dumps(compact, indent=2)[:12000]   # cap at ~12k chars
+                + "\n```"
+            )
+        else:
+            system_instruction = _LANDING_SYSTEM
+
+        model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash",
+            system_instruction=system_instruction,
+        )
+
+        # Build history (all messages except the last one)
+        history = []
+        for msg in req.messages[:-1]:
+            role = "user" if msg.role == "user" else "model"
+            history.append({"role": role, "parts": [msg.content]})
+
+        chat = model.start_chat(history=history)
+        last = req.messages[-1].content
+        response = chat.send_message(last)
+        return {"reply": response.text}
+
+    except Exception as e:
+        return {"reply": f"Assistant error: {str(e)}"}
 
 
 # ── Verify endpoints ─────────────────────────────────────────────────
