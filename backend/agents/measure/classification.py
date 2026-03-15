@@ -96,7 +96,7 @@ added fields:
   "classification_reasoning": "<brief 1-sentence justification>"
 }}
 
-Return ONLY valid JSON — no markdown fencing, no commentary.\
+Return ONLY valid JSON - no markdown fencing, no commentary.\
 """
 
 

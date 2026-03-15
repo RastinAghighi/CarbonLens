@@ -15,7 +15,7 @@ class VerifyRequest(BaseModel):
     company_name: str
 
 
-# MeasureRequest is a file upload — handled via FastAPI's UploadFile,
+# MeasureRequest is a file upload - handled via FastAPI's UploadFile,
 # not a Pydantic model.  We keep a placeholder here for documentation.
 
 

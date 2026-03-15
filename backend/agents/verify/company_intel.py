@@ -22,7 +22,7 @@ Return ONLY valid JSON (no markdown fencing, no commentary) with this exact stru
 {
   "name": "<official company name>",
   "ticker": "<stock ticker or null>",
-  "industry": "<primary industry sector — must match one of: Oil & Gas - Integrated, Oil & Gas - Exploration & Production, Technology - Internet Services, Technology - Hardware, Technology - Software, Utilities - Electric, Automotive, Airlines, Cement & Building Materials, Steel & Metals, Retail - General, Pharmaceuticals, Financial Services, Food & Beverage, Chemicals>",
+  "industry": "<primary industry sector - must match one of: Oil & Gas - Integrated, Oil & Gas - Exploration & Production, Technology - Internet Services, Technology - Hardware, Technology - Software, Utilities - Electric, Automotive, Airlines, Cement & Building Materials, Steel & Metals, Retail - General, Pharmaceuticals, Financial Services, Food & Beverage, Chemicals>",
   "headquarters": "<city, state/country>",
   "revenue_usd": <most recent annual revenue in USD as a number>,
   "revenue_year": <year of that revenue figure>,
@@ -37,7 +37,7 @@ Return ONLY valid JSON (no markdown fencing, no commentary) with this exact stru
 
 Be factual. Use real, publicly known data from your training. If you are unsure
 about a specific number, give your best estimate and round to reasonable precision.
-Do NOT fabricate commitments or controversies — only include ones you are confident about.\
+Do NOT fabricate commitments or controversies - only include ones you are confident about.\
 """
 
 
@@ -112,7 +112,7 @@ async def company_intelligence_agent(state: dict) -> dict:
         f"I already have EPA GHGRP data showing {ghgrp_summary['facilities_found']} "
         f"reporting facilities with total emissions of "
         f"{ghgrp_summary.get('total_emissions_mtco2e', 0):.1f} MtCO2e. "
-        f"You do NOT need to estimate facility emissions — just provide the "
+        f"You do NOT need to estimate facility emissions - just provide the "
         f"corporate profile fields."
     )
 

@@ -54,7 +54,7 @@ Return ONLY valid JSON (no markdown fencing) with this structure:
   "recommendations": [
     {
       "priority": <1-5, 1 = highest>,
-      "target": "<what to change — specific supplier, category, or practice>",
+      "target": "<what to change - specific supplier, category, or practice>",
       "recommendation": "<specific actionable recommendation>",
       "potential_reduction_percent": "<estimated % reduction, e.g. '10-20%'>",
       "difficulty": "<low | medium | high>",

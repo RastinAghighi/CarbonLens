@@ -1,6 +1,6 @@
 """Revenue-based emission estimation engine.
 
-Copied verbatim from docs/ARCHITECTURE.md — ESTIMATION ENGINE section.
+Copied verbatim from docs/ARCHITECTURE.md - ESTIMATION ENGINE section.
 """
 
 SECTOR_INTENSITIES = {

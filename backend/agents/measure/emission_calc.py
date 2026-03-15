@@ -1,6 +1,6 @@
 """Measure Agent 3: Emission Factor Lookup & Calculation.
 
-PURE PYTHON — NO LLM CALLS.
+PURE PYTHON - NO LLM CALLS.
 
 Queries SQLite for emission factors via core.database.query_eeio_factor,
 calculates emissions_kgco2e = amount_usd * ef_kgco2e_per_usd.

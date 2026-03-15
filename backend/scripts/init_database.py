@@ -206,7 +206,7 @@ def main():
     cur.execute("SELECT COUNT(*) FROM industry_benchmarks")
     print(f"  industry_benchmarks: {cur.fetchone()[0]} rows")
     cur.execute("SELECT COUNT(*) FROM ghgrp_facilities")
-    print(f"  ghgrp_facilities:    {cur.fetchone()[0]} rows (empty — loaded in next task)")
+    print(f"  ghgrp_facilities:    {cur.fetchone()[0]} rows (empty - loaded in next task)")
 
     conn.commit()
     conn.close()

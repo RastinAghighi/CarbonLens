@@ -19,7 +19,7 @@ def split_emissions(total, ch4_pct=0.04, n2o_pct=0.005):
 
 
 # ---------------------------------------------------------------------------
-# ExxonMobil — multi-year (2021-2023), ~45 facilities per year
+# ExxonMobil - multi-year (2021-2023), ~45 facilities per year
 # Target total per year: ~73 MtCO2e (slight trend: 75 → 73 → 71)
 # ---------------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ EXXON_YEAR_MULT = {2021: 1.03, 2022: 1.00, 2023: 0.97}
 
 
 # ---------------------------------------------------------------------------
-# Shell — single year (2022), ~30 facilities, total ~45 MtCO2e
+# Shell - single year (2022), ~30 facilities, total ~45 MtCO2e
 # ---------------------------------------------------------------------------
 
 SHELL_FACILITIES = [
@@ -115,7 +115,7 @@ SHELL_FACILITIES = [
 
 
 # ---------------------------------------------------------------------------
-# Amazon — single year (2022), ~15 data centers, total ~5 MtCO2e
+# Amazon - single year (2022), ~15 data centers, total ~5 MtCO2e
 # ---------------------------------------------------------------------------
 
 AMAZON_FACILITIES = [
@@ -138,7 +138,7 @@ AMAZON_FACILITIES = [
 
 
 # ---------------------------------------------------------------------------
-# Chevron — single year (2022), ~35 facilities, total ~55 MtCO2e
+# Chevron - single year (2022), ~35 facilities, total ~55 MtCO2e
 # ---------------------------------------------------------------------------
 
 CHEVRON_FACILITIES = [
@@ -208,17 +208,17 @@ def main():
 
     all_rows = []
 
-    # ExxonMobil — 3 years with CH4 higher for oil/gas
+    # ExxonMobil - 3 years with CH4 higher for oil/gas
     for year, mult in EXXON_YEAR_MULT.items():
         all_rows.extend(build_rows(EXXON_FACILITIES, year, mult, ch4_pct=0.06, n2o_pct=0.004))
 
-    # Shell — 2022 only
+    # Shell - 2022 only
     all_rows.extend(build_rows(SHELL_FACILITIES, 2022, 1.0, ch4_pct=0.05, n2o_pct=0.004))
 
-    # Amazon — 2022 only, negligible CH4/N2O for data centers
+    # Amazon - 2022 only, negligible CH4/N2O for data centers
     all_rows.extend(build_rows(AMAZON_FACILITIES, 2022, 1.0, ch4_pct=0.002, n2o_pct=0.001))
 
-    # Chevron — 2022 only
+    # Chevron - 2022 only
     all_rows.extend(build_rows(CHEVRON_FACILITIES, 2022, 1.0, ch4_pct=0.055, n2o_pct=0.004))
 
     cur.executemany("""

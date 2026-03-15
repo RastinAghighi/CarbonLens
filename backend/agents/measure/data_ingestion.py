@@ -21,7 +21,7 @@ text from a procurement/purchasing spreadsheet. Your job is to parse it into
 a clean, normalized JSON array of line items.
 
 RULES:
-1. Detect column headers automatically — they may be in the first row or
+1. Detect column headers automatically - they may be in the first row or
    embedded in the data.
 2. EXCLUDE any rows that are:
    - Column headers
@@ -48,7 +48,7 @@ RULES:
    (e.g., same PO prefix), infer it.
 6. Clean up inconsistent location formatting (e.g., "Gary IN" → "Gary, IN",
    "Shenzhen China" → "Shenzhen, China").
-7. Return ONLY the JSON array — no markdown fencing, no commentary.\
+7. Return ONLY the JSON array - no markdown fencing, no commentary.\
 """
 
 

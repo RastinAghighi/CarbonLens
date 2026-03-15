@@ -4,7 +4,7 @@ Takes the full accumulated state (company_profile, claims_extracted,
 independent_data, cross_reference_analysis) and produces a polished,
 human-readable transparency report suitable for non-expert audiences.
 
-Uses Claude Sonnet for narrative generation — no tool calls.
+Uses Claude Sonnet for narrative generation - no tool calls.
 
 Input:  all of state (agents 1-4 outputs)
 Output: state["final_report"]
@@ -21,12 +21,12 @@ SYSTEM_PROMPT = """\
 You are a sustainability transparency report writer. You will receive the \
 complete analysis of a company's environmental claims, including:
 
-1. **company_profile** — basic info (sector, revenue, headquarters, facilities)
-2. **claims_extracted** — quantitative sustainability claims from the company's \
+1. **company_profile** - basic info (sector, revenue, headquarters, facilities)
+2. **claims_extracted** - quantitative sustainability claims from the company's \
 own reports
-3. **independent_data** — EPA GHGRP facility emissions, industry benchmarks, \
+3. **independent_data** - EPA GHGRP facility emissions, industry benchmarks, \
 revenue-based estimates, third-party ratings, and news
-4. **cross_reference_analysis** — forensic findings, transparency score with \
+4. **cross_reference_analysis** - forensic findings, transparency score with \
 breakdown, positive observations, and data limitations
 
 Your task: transform this raw analysis into a polished, human-readable \
@@ -57,7 +57,7 @@ takeaway from this analysis. Lead with the transparency score and its meaning, \
 then the key finding. Write for someone who will only read this paragraph.>",
 
   "score_context": {
-    "overall": "<1-2 sentences interpreting the overall transparency score — \
+    "overall": "<1-2 sentences interpreting the overall transparency score - \
 what does this number mean in practical terms?>",
     "completeness": "<1-2 sentences: what does the company disclose, and what \
 is missing?>",
@@ -88,9 +88,9 @@ well, with specific evidence>"
   "data_gaps": [
     {
       "gap": "<what couldn't be verified>",
-      "reason": "<why — e.g., no GHGRP match, company is private, report not \
+      "reason": "<why - e.g., no GHGRP match, company is private, report not \
 publicly available>",
-      "impact": "<how this gap affects the analysis — e.g., 'This means we \
+      "impact": "<how this gap affects the analysis - e.g., 'This means we \
 cannot independently confirm Scope 1 emissions'>"
     }
   ],
@@ -106,7 +106,7 @@ reader understand the basis for the conclusions.>"
 async def report_generation_agent(state: dict) -> dict:
     """Agent 5: Generate a polished, human-readable transparency report.
 
-    Pure narrative generation over accumulated state — no tool calls.
+    Pure narrative generation over accumulated state - no tool calls.
     Uses Claude Sonnet for clear, accessible writing.
 
     Input:  state (all outputs from agents 1-4)

@@ -48,7 +48,7 @@ const AGENTS = [
     thoughts: [
       'Comparing reported vs. estimated emissions...',
       'Detecting disclosure gaps across scopes...',
-      'Scoring data completeness (0–100)...',
+      'Scoring data completeness (0-100)...',
       'Flagging inconsistencies with standards...',
       'Calculating transparency confidence...',
     ],
@@ -290,39 +290,37 @@ function FeedEntry({ entry }) {
   );
 }
 
-<<<<<<< HEAD
-const API_BASE = import.meta.env.VITE_API_URL || 'https://carbonlens-backend-592028248398.us-central1.run.app';
-=======
 /* ─── Extra keyframes injected once ─────────────────────────── */
 const STYLE_ID = 'carbonlens-progress-styles';
 function injectStyles() {
-  if (document.getElementById(STYLE_ID)) return;
-  const s = document.createElement('style');
-  s.id = STYLE_ID;
-  s.textContent = `
-    @keyframes ping {
-      75%, 100% { transform: scale(1.6); opacity: 0; }
-    }
-    @keyframes bounce-dot {
-      0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
-      40% { transform: translateY(-4px); opacity: 1; }
-    }
-  `;
-  document.head.appendChild(s);
+  if (document.getElementById(STYLE_ID)) return;
+  const s = document.createElement('style');
+  s.id = STYLE_ID;
+  s.textContent = `
+    @keyframes ping {
+      75%, 100% { transform: scale(1.6); opacity: 0; }
+    }
+    @keyframes bounce-dot {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+      40% { transform: translateY(-4px); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(s);
 }
 
 /* ─── Agent display labels for feed ─────────────────────────── */
 const AGENT_DISPLAY = {
-  company_intelligence: 'Company Intel',
-  report_extraction: 'Report Extraction',
-  independent_data: 'Independent Data',
-  cross_reference: 'Cross-Reference',
-  report_generation: 'Report Generation',
+  company_intelligence: 'Company Intel',
+  report_extraction: 'Report Extraction',
+  independent_data: 'Independent Data',
+  cross_reference: 'Cross-Reference',
+  report_generation: 'Report Generation',
 };
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://carbonlens-backend-592028248398.us-central1.run.app';
->>>>>>> c4e62f5691cf69845b21f10a97a679ed29ca41cc
-
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  'https://carbonlens-backend-592028248398.us-central1.run.app';
+  
 /* ─── Main component ─────────────────────────────────────────── */
 export default function VerifyProgress({ companyName, onBack, onComplete }) {
   const [jobId, setJobId] = useState(null);
@@ -367,7 +365,7 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
         const data = await res.json();
         if (!cancelled) {
           setJobId(data.job_id);
-          addFeedEntry('Pipeline started — 5 agents queued', 'info');
+          addFeedEntry('Pipeline started - 5 agents queued', 'info');
         }
       } catch (err) {
         if (!cancelled) {
@@ -418,12 +416,12 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
           const curr = agentMap[key]?.status;
           if (curr && curr !== prev) {
             const name = AGENT_DISPLAY[key];
-            if (curr === 'running') addFeedEntry(`${name} — starting...`, 'running');
+            if (curr === 'running') addFeedEntry(`${name} - starting...`, 'running');
             if (curr === 'complete') {
               const msg = agentMap[key]?.summary;
-              addFeedEntry(`${name} — complete`, 'complete', msg || null);
+              addFeedEntry(`${name} - complete`, 'complete', msg || null);
             }
-            if (curr === 'error') addFeedEntry(`${name} — error`, 'error');
+            if (curr === 'error') addFeedEntry(`${name} - error`, 'error');
           }
         });
         prevStatuses.current = agentMap;
@@ -435,8 +433,8 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
           clearInterval(pollRef.current);
           clearInterval(timerRef.current);
           clearInterval(thoughtRef.current);
-          addFeedEntry('Report generation complete — loading results...', 'complete');
-          setTimeout(() => onComplete(data.result), 900);
+          addFeedEntry('Report generation complete - loading results...', 'complete');
+          setTimeout(() => onComplete(data.result, jobId), 900);
         } else if (data.status === 'error') {
           clearInterval(pollRef.current);
           clearInterval(timerRef.current);

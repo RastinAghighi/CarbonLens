@@ -72,7 +72,7 @@ async def main():
     print(f"    Consistency:   {breakdown.get('consistency', 'N/A')} / 100  (30%)")
     print(f"    Verifiability: {breakdown.get('verifiability', 'N/A')} / 100  (25%)")
     print(f"    Ambition:      {breakdown.get('ambition', 'N/A')} / 100  (20%)")
-    print(f"    Confidence:    {score.get('confidence', 'N/A')} — {score.get('confidence_rationale', '')}")
+    print(f"    Confidence:    {score.get('confidence', 'N/A')} - {score.get('confidence_rationale', '')}")
     print()
 
     # Findings

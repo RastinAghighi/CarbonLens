@@ -21,7 +21,7 @@ publicly available sustainability reports and ESG disclosures.
 
 Based on your knowledge of the company's real, publicly available sustainability
 reports and disclosures, generate the quantitative environmental claims they
-have made. Be specific and realistic — use actual numbers this company has
+have made. Be specific and realistic - use actual numbers this company has
 published. If you are not confident about an exact figure, use your best
 estimate based on the company's sector, size, and known commitments, but keep
 it realistic.

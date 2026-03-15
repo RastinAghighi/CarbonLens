@@ -40,7 +40,85 @@ def create_job(file_content: str) -> str:
 
 
 def get_job(job_id: str) -> dict | None:
-    return _jobs.get(job_id)
+    job = _jobs.get(job_id)
+    if job is not None:
+        return job
+    # Fall back to SQLite for completed jobs (survives restarts / direct URL loads)
+    import db
+    return db.load_job("measure", job_id)
+
+
+def _normalize_measure_result(analysis: dict) -> dict:
+    """Map analysis agent output to the shape expected by MeasureResults.jsx."""
+    if not analysis or not isinstance(analysis, dict):
+        return {}
+    summary = analysis.get("summary") or {}
+    by_cat = analysis.get("by_scope3_category") or []
+    by_supp = analysis.get("by_supplier") or []
+    hotspots = analysis.get("hotspots") or []
+    recs = analysis.get("recommendations") or []
+
+    total_tco2e = summary.get("total_scope3_tco2e") or 0
+    line_count = summary.get("line_items_processed") or summary.get("line_items_calculated") or 0
+
+    category_breakdown = [
+        {
+            "name": c.get("category_name", f"Category {c.get('category_number', '')}"),
+            "emissions": (c.get("emissions_kgco2e") or 0) / 1000.0,
+            "percentage": c.get("percent_of_total") or 0,
+        }
+        for c in by_cat
+    ]
+
+    def _priority_label(p):
+        if p is None:
+            return "Medium"
+        try:
+            n = int(p)
+            if n <= 2:
+                return "High"
+            if n <= 3:
+                return "Medium"
+            return "Low"
+        except (TypeError, ValueError):
+            return str(p).capitalize() if p else "Medium"
+
+    supplier_ranking = [
+        {
+            "name": s.get("supplier_name", "Unknown"),
+            "total_emissions": (s.get("total_emissions_kgco2e") or 0) / 1000.0,
+            "spend": s.get("total_spend_usd"),
+            "emission_intensity": s.get("emission_intensity_kgco2e_per_usd"),
+            "percentage_of_total": s.get("percent_of_total") or 0,
+            "line_items": [],
+        }
+        for s in by_supp
+    ]
+
+    recommendations = [
+        {
+            "priority": _priority_label(r.get("priority")),
+            "target": r.get("target"),
+            "recommendation": r.get("recommendation", ""),
+            "potential_reduction": r.get("potential_reduction_percent") or r.get("potential_reduction"),
+            "difficulty": r.get("difficulty"),
+            "timeframe": r.get("timeframe"),
+        }
+        for r in recs
+    ]
+
+    return {
+        "total_emissions": total_tco2e,
+        "line_items_count": line_count,
+        "confidence": analysis.get("confidence", "Medium"),
+        "equivalence": None,
+        "category_breakdown": category_breakdown,
+        "supplier_ranking": supplier_ranking,
+        "hotspots": hotspots,
+        "recommendations": recommendations,
+        "data_quality": analysis.get("data_quality_summary") or analysis.get("data_quality"),
+        "unclassified_items": analysis.get("unclassified_items") or [],
+    }
 
 
 async def _run_pipeline(job_id: str) -> None:
@@ -74,7 +152,10 @@ async def _run_pipeline(job_id: str) -> None:
             job["agents"][i]["message"] = _agent_summary(i, state)
 
         job["status"] = "complete"
-        job["result"] = state.get("analysis", state)
+        job["result"] = _normalize_measure_result(state.get("analysis", {}))
+        # Persist to SQLite so the report survives server restarts
+        import db
+        db.save_job("measure", job_id, job["result"])
 
     except Exception as e:
         current = job["current_agent"] - 1
