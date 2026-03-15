@@ -85,7 +85,7 @@ function PreviewCard({ label, value }) {
   );
 }
 
-const API_BASE = 'http://localhost:8001';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://carbonlens-backend-592028248398.us-central1.run.app';
 
 export default function VerifyProgress({ companyName, onBack, onComplete }) {
   const [jobId, setJobId] = useState(null);
