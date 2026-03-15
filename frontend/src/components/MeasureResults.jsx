@@ -179,10 +179,10 @@ function SupplierRow({ supplier, rank, isTop3, isExpanded, onToggle }) {
           {(supplier.total_emissions ?? 0).toLocaleString()}
         </td>
         <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: 'rgba(226,245,236,0.5)', background: isTop3 ? 'rgba(16,185,129,0.04)' : 'transparent' }}>
-          {supplier.spend != null ? `$${supplier.spend.toLocaleString()}` : '—'}
+          {supplier.spend != null ? `$${supplier.spend.toLocaleString()}` : '-'}
         </td>
         <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: 'rgba(226,245,236,0.5)', fontFamily: "'JetBrains Mono', 'Fira Code', monospace", background: isTop3 ? 'rgba(16,185,129,0.04)' : 'transparent' }}>
-          {supplier.emission_intensity != null ? supplier.emission_intensity.toFixed(2) : '—'}
+          {supplier.emission_intensity != null ? supplier.emission_intensity.toFixed(2) : '-'}
         </td>
         <td style={{ padding: '12px 16px', fontSize: '0.875rem', fontWeight: 600, color: '#10B981', fontFamily: "'JetBrains Mono', 'Fira Code', monospace", background: isTop3 ? 'rgba(16,185,129,0.04)' : 'transparent' }}>
           {(supplier.percentage_of_total ?? 0).toFixed(1)}%
@@ -216,14 +216,14 @@ function SupplierRow({ supplier, rank, isTop3, isExpanded, onToggle }) {
                 <tbody>
                   {supplier.line_items.map((item, i) => (
                     <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ padding: '8px 0', color: 'rgba(226,245,236,0.65)' }}>{item.description || '—'}</td>
+                      <td style={{ padding: '8px 0', color: 'rgba(226,245,236,0.65)' }}>{item.description || '-'}</td>
                       <td style={{ padding: '8px 0', textAlign: 'right', color: '#e2f5ec', fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}>
                         {(item.emissions ?? 0).toLocaleString()}
                       </td>
                       <td style={{ padding: '8px 0', textAlign: 'right', color: 'rgba(226,245,236,0.5)' }}>
-                        {item.spend != null ? `$${item.spend.toLocaleString()}` : '—'}
+                        {item.spend != null ? `$${item.spend.toLocaleString()}` : '-'}
                       </td>
-                      <td style={{ padding: '8px 0 8px 16px', color: 'rgba(226,245,236,0.4)' }}>{item.category || '—'}</td>
+                      <td style={{ padding: '8px 0 8px 16px', color: 'rgba(226,245,236,0.4)' }}>{item.category || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -639,11 +639,11 @@ export default function MeasureResults({ result, onNewAnalysis }) {
                   <tbody>
                     {unclassified_items.map((item, i) => (
                       <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                        <td style={{ padding: '10px 0', color: 'rgba(226,245,236,0.65)' }}>{item.description || '—'}</td>
+                        <td style={{ padding: '10px 0', color: 'rgba(226,245,236,0.65)' }}>{item.description || '-'}</td>
                         <td style={{ padding: '10px 0', textAlign: 'right', color: 'rgba(226,245,236,0.45)' }}>
-                          {item.spend != null ? `$${item.spend.toLocaleString()}` : '—'}
+                          {item.spend != null ? `$${item.spend.toLocaleString()}` : '-'}
                         </td>
-                        <td style={{ padding: '10px 0 10px 16px', color: 'rgba(226,245,236,0.4)' }}>{item.reason || '—'}</td>
+                        <td style={{ padding: '10px 0 10px 16px', color: 'rgba(226,245,236,0.4)' }}>{item.reason || '-'}</td>
                       </tr>
                     ))}
                   </tbody>

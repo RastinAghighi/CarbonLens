@@ -177,7 +177,7 @@ function DashboardView({ result, charts }) {
           />
           <MetricCard
             label="EPA Facilities"
-            value={company_profile?.ghgrp_data?.facilities_found ?? company_profile?.facilities_found ?? '—'}
+            value={company_profile?.ghgrp_data?.facilities_found ?? company_profile?.facilities_found ?? '-'}
             sub={`${company_profile?.ghgrp_data?.reporting_years?.length ?? 0} years tracked`}
           />
           <MetricCard
@@ -186,7 +186,7 @@ function DashboardView({ result, charts }) {
           />
           <MetricCard
             label="Total Est. Emissions"
-            value={est.estimated_total_mtco2e ? `${(est.estimated_total_mtco2e / 1000).toFixed(0)}K` : '—'}
+            value={est.estimated_total_mtco2e ? `${(est.estimated_total_mtco2e / 1000).toFixed(0)}K` : '-'}
             sub="tCO₂e (revenue-based)" color="#F59E0B"
           />
         </div>
@@ -346,7 +346,7 @@ function AIAnalystView({ result, companyName }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `I've analyzed the full ESG report for **${companyName}** — transparency score ${result?.transparency_score ?? 0}/100. Ask me anything about the findings, evidence, data gaps, or what the numbers really mean.`,
+      content: `I've analyzed the full ESG report for **${companyName}** - transparency score ${result?.transparency_score ?? 0}/100. Ask me anything about the findings, evidence, data gaps, or what the numbers really mean.`,
     },
   ]);
   const [input, setInput] = useState('');
@@ -721,11 +721,9 @@ export default function VerifyResults({ companyName, result, onNewAnalysis }) {
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'linear-gradient(135deg,#10B981,#059669)', boxShadow: '0 0 10px rgba(16,185,129,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} style={{ width: '12px', height: '12px' }}>
-                <circle cx="11" cy="11" r="7" /><path strokeLinecap="round" d="m16.5 16.5 3 3" />
-              </svg>
+              <img src="/logo-white.png" alt="CarbonLens logo" style={{ width: '14px', height: '14px' }} />
             </div>
-            <span style={{ fontSize: '0.78rem', color: 'rgba(226,245,236,0.4)' }}>ESG Report —</span>
+            <span style={{ fontSize: '0.78rem', color: 'rgba(226,245,236,0.4)' }}>ESG Report -</span>
             <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#34D399' }}>{companyName}</span>
           </div>
 

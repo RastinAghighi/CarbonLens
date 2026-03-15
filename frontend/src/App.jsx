@@ -133,9 +133,7 @@ function Navbar({ onScrollToModes }) {
             boxShadow: '0 0 12px rgba(16,185,129,0.4)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} style={{ width: '14px', height: '14px' }}>
-              <circle cx="11" cy="11" r="7" /><path strokeLinecap="round" d="m16.5 16.5 3 3" />
-            </svg>
+            <img src="/logo-white.png" alt="CarbonLens logo" style={{ width: '17px', height: '17px' }} />
           </div>
           <span style={{ fontWeight: 700, fontSize: '1rem', color: '#e2f5ec', letterSpacing: '-0.01em' }}>CarbonLens</span>
         </div>
@@ -628,9 +626,7 @@ function Footer() {
       <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'linear-gradient(135deg, #10B981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} style={{ width: '10px', height: '10px' }}>
-              <circle cx="11" cy="11" r="7" /><path strokeLinecap="round" d="m16.5 16.5 3 3" />
-            </svg>
+            <img src="/logo-white.png" alt="CarbonLens logo" style={{ width: '12px', height: '12px' }} />
           </div>
           <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#e2f5ec' }}>CarbonLens</span>
         </div>
@@ -737,7 +733,7 @@ function LandingAssistantSection() {
 
             {/* Two feature cards */}
             {[
-              { icon: '🔍', title: 'Verify Mode', desc: 'Enter any company name. CarbonLens runs 5 AI agents to cross-reference EPA data, sustainability reports, and benchmarks — producing a 0–100 Transparency Score with evidence-backed findings.' },
+              { icon: '🔍', title: 'Verify Mode', desc: 'Enter any company name. CarbonLens runs 5 AI agents to cross-reference EPA data, sustainability reports, and benchmarks - producing a 0–100 Transparency Score with evidence-backed findings.' },
               { icon: '📊', title: 'Measure Mode', desc: 'Upload a CSV or Excel of procurement spend. CarbonLens maps every line item to EPA DEFRA emission factors and returns Scope 3 totals by category, supplier rankings, and reduction opportunities.' },
             ].map(card => (
               <div key={card.title} style={{
