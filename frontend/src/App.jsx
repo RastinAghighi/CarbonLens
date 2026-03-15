@@ -105,13 +105,20 @@ function BackgroundDecoration() {
 }
 
 /* ── Navbar ── */
-function Navbar({ onScrollToModes }) {
+function Navbar({ onScrollToModes, onScrollToHowItWorks, onScrollToProblem, onScrollToGuide }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const navLinks = [
+    { label: 'Analysis', onClick: onScrollToModes },
+    { label: 'How It Works', onClick: onScrollToHowItWorks },
+    { label: 'The Problem', onClick: onScrollToProblem },
+    { label: 'Product Guide', onClick: onScrollToGuide },
+  ];
 
   return (
     <nav style={{
@@ -125,8 +132,11 @@ function Navbar({ onScrollToModes }) {
       } : {}),
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Logo - scrolls to top */}
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        >
           <div style={{
             width: '28px', height: '28px', borderRadius: '6px',
             background: 'linear-gradient(135deg, #10B981, #059669)',
@@ -136,17 +146,17 @@ function Navbar({ onScrollToModes }) {
             <img src="/logo-white.png" alt="CarbonLens logo" style={{ width: '17px', height: '17px' }} />
           </div>
           <span style={{ fontWeight: 700, fontSize: '1rem', color: '#e2f5ec', letterSpacing: '-0.01em' }}>CarbonLens</span>
-        </div>
+        </button>
 
         {/* Nav links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          {['Verify', 'Measure', 'How It Works', 'About'].map(link => (
-            <button key={link}
-              onClick={link === 'Verify' || link === 'Measure' ? onScrollToModes : undefined}
+          {navLinks.map(({ label, onClick }) => (
+            <button key={label}
+              onClick={onClick}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(226,245,236,0.55)', fontSize: '0.875rem', fontWeight: 500, transition: 'color 0.2s' }}
               onMouseEnter={e => e.target.style.color = '#34D399'}
               onMouseLeave={e => e.target.style.color = 'rgba(226,245,236,0.55)'}
-            >{link}</button>
+            >{label}</button>
           ))}
           <button
             onClick={onScrollToModes}
@@ -844,22 +854,38 @@ function LandingAssistantSection() {
 /* ── Landing Page ── */
 function LandingPage({ onAnalyze, onMeasure }) {
   const modesRef = useRef(null);
-  function scrollToModes() {
-    modesRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }
+  const howItWorksRef = useRef(null);
+  const problemRef = useRef(null);
+  const guideRef = useRef(null);
+
+  function scrollToModes() { modesRef.current?.scrollIntoView({ behavior: 'smooth' }); }
+  function scrollToHowItWorks() { howItWorksRef.current?.scrollIntoView({ behavior: 'smooth' }); }
+  function scrollToProblem() { problemRef.current?.scrollIntoView({ behavior: 'smooth' }); }
+  function scrollToGuide() { guideRef.current?.scrollIntoView({ behavior: 'smooth' }); }
 
   return (
     <div style={{ minHeight: '100vh', background: '#050e08', position: 'relative' }}>
       <BackgroundDecoration />
-      <Navbar onScrollToModes={scrollToModes} />
+      <Navbar
+        onScrollToModes={scrollToModes}
+        onScrollToHowItWorks={scrollToHowItWorks}
+        onScrollToProblem={scrollToProblem}
+        onScrollToGuide={scrollToGuide}
+      />
       <HeroSection onScrollToModes={scrollToModes} />
       <div ref={modesRef}>
         <ModeCards onAnalyze={onAnalyze} onMeasure={onMeasure} />
       </div>
-      <HowItWorks />
-      <StatsSection />
+      <div ref={howItWorksRef}>
+        <HowItWorks />
+      </div>
+      <div ref={problemRef}>
+        <StatsSection />
+      </div>
       <DashboardPreview />
-      <LandingAssistantSection />
+      <div ref={guideRef}>
+        <LandingAssistantSection />
+      </div>
       <CTASection onScrollToModes={scrollToModes} />
       <Footer />
     </div>

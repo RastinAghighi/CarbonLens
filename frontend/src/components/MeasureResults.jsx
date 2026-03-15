@@ -319,8 +319,21 @@ export default function MeasureResults({ result, onNewAnalysis }) {
         padding: '0 24px',
       }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 8px rgba(16,185,129,0.6)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Logo - home link */}
+            <button
+              onClick={onNewAnalysis}
+              title="Back to home"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              onMouseEnter={e => { e.currentTarget.querySelector('span.brand').style.color = '#34D399'; }}
+              onMouseLeave={e => { e.currentTarget.querySelector('span.brand').style.color = '#e2f5ec'; }}
+            >
+              <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'linear-gradient(135deg,#10B981,#059669)', boxShadow: '0 0 10px rgba(16,185,129,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <img src="/logo-white.png" alt="CarbonLens logo" style={{ width: '14px', height: '14px' }} />
+              </div>
+              <span className="brand" style={{ fontSize: '0.95rem', fontWeight: 700, color: '#e2f5ec', letterSpacing: '-0.01em', transition: 'color 0.2s' }}>CarbonLens</span>
+            </button>
+            <span style={{ fontSize: '0.78rem', color: 'rgba(226,245,236,0.25)' }}>/</span>
             <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'rgba(226,245,236,0.5)' }}>Scope 3</span>
             <span style={{ fontSize: '1rem', fontWeight: 700, color: '#34D399' }}>Emissions Report</span>
           </div>
