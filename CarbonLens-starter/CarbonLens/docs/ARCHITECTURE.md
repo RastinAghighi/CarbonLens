@@ -1,6 +1,6 @@
-# CarbonLens — Master Architecture Reference
+# CarbonLens - Master Architecture Reference
 
-This document contains ALL architecture decisions, database schemas, output schemas, and agent prompts. Claude Code should reference specific sections of this document per task — NOT try to implement everything at once.
+This document contains ALL architecture decisions, database schemas, output schemas, and agent prompts. Claude Code should reference specific sections of this document per task - NOT try to implement everything at once.
 
 ---
 
@@ -143,7 +143,7 @@ COMPANY_ALIASES = {
 
 ---
 
-## VERIFY MODE — OUTPUT SCHEMA
+## VERIFY MODE - OUTPUT SCHEMA
 
 See docs/verify_output_schema.json (the full JSON structure from the architecture planning).
 
@@ -156,7 +156,7 @@ Key structure:
 
 ---
 
-## MEASURE MODE — OUTPUT SCHEMA
+## MEASURE MODE - OUTPUT SCHEMA
 
 Key structure:
 - summary: {total_scope3_kgco2e, total_scope3_tco2e, line_items_processed, confidence, caveat}
@@ -228,7 +228,7 @@ def run_measure_pipeline(file_content: str) -> dict:
     state = {"raw_input": file_content}
     state = data_ingestion_agent(state)          # Agent 1 (LLM)
     state = category_classification_agent(state)  # Agent 2 (LLM)
-    state = emission_factor_calculate(state)      # Agent 3 (CODE — no LLM)
+    state = emission_factor_calculate(state)      # Agent 3 (CODE - no LLM)
     state = analysis_recommendation_agent(state)  # Agent 4 (LLM)
     return state
 ```
@@ -244,7 +244,7 @@ def run_measure_pipeline(file_content: str) -> dict:
 - Output: state.classified_items (enriched with scope3_category + ef_lookup_key)
 
 ### Measure Agent 3: Emission Factor Lookup & Calculate
-- NO LLM — pure Python code
+- NO LLM - pure Python code
 - Queries SQLite for emission factors
 - Applies formulas: emissions = amount × factor
 - Output: state.calculated_items
@@ -259,11 +259,11 @@ def run_measure_pipeline(file_content: str) -> dict:
 ## FASTAPI ENDPOINTS
 
 ```
-POST /api/verify          — Start Verify analysis. Body: {company_name: string}. Returns: {job_id}
-GET  /api/verify/{job_id} — Poll status. Returns: {status, current_agent, agents: [{name, status, message}], result: null | full_result}
+POST /api/verify          - Start Verify analysis. Body: {company_name: string}. Returns: {job_id}
+GET  /api/verify/{job_id} - Poll status. Returns: {status, current_agent, agents: [{name, status, message}], result: null | full_result}
 
-POST /api/measure         — Start Measure analysis. Body: multipart file upload. Returns: {job_id}
-GET  /api/measure/{job_id} — Poll status. Same pattern as verify.
+POST /api/measure         - Start Measure analysis. Body: multipart file upload. Returns: {job_id}
+GET  /api/measure/{job_id} - Poll status. Same pattern as verify.
 ```
 
 Jobs run in background threads. Frontend polls every 1-2 seconds.

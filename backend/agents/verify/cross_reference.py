@@ -20,10 +20,10 @@ SYSTEM_PROMPT = """\
 You are a forensic carbon-accounting analyst. You will receive three structured \
 JSON inputs about a company:
 
-1. **company_profile** — basic info (sector, revenue, headquarters, facilities)
-2. **claims_extracted** — quantitative sustainability claims pulled from the \
+1. **company_profile** - basic info (sector, revenue, headquarters, facilities)
+2. **claims_extracted** - quantitative sustainability claims pulled from the \
 company's own reports (each has an index you can reference)
-3. **independent_data** — EPA GHGRP facility emissions, industry benchmarks, \
+3. **independent_data** - EPA GHGRP facility emissions, industry benchmarks, \
 revenue-based emission estimates, third-party ratings, and news
 
 Your task: cross-reference the company's claims against the independent data \
@@ -34,29 +34,29 @@ and produce a forensic analysis.
 Check for ALL of the following. Only include a finding if you have concrete \
 evidence for it:
 
-1. **INTENSITY_VS_ABSOLUTE** — Company reports intensity metric improvements \
+1. **INTENSITY_VS_ABSOLUTE** - Company reports intensity metric improvements \
 (e.g., "reduced emissions per unit of revenue") while absolute emissions \
 actually increased. This is a common greenwashing tactic.
-2. **MISSING_SCOPE** — Company omits Scope 3 from reduction targets or \
+2. **MISSING_SCOPE** - Company omits Scope 3 from reduction targets or \
 headline emissions numbers. Scope 3 is often 80-95% of total emissions for \
 many sectors.
-3. **BOUNDARY_EXCLUSION** — Company excludes subsidiaries, joint ventures, \
+3. **BOUNDARY_EXCLUSION** - Company excludes subsidiaries, joint ventures, \
 acquired entities, or specific divisions from its emissions boundary.
-4. **BASELINE_MANIPULATION** — Cherry-picked or retroactively adjusted \
+4. **BASELINE_MANIPULATION** - Cherry-picked or retroactively adjusted \
 baseline year (e.g., choosing a high-emission year as baseline to inflate \
 apparent reductions).
-5. **EPA_DISCREPANCY** — Company's self-reported numbers conflict with EPA \
+5. **EPA_DISCREPANCY** - Company's self-reported numbers conflict with EPA \
 GHGRP facility-level data. Compare GHGRP totals against the company's \
 reported Scope 1 for the relevant year.
-6. **UNVERIFIABLE_CLAIM** — Major claims (large reductions, net-zero targets, \
+6. **UNVERIFIABLE_CLAIM** - Major claims (large reductions, net-zero targets, \
 renewable energy percentages) with no independent data to cross-reference.
-7. **SELECTIVE_REPORTING** — Company highlights positive metrics while \
+7. **SELECTIVE_REPORTING** - Company highlights positive metrics while \
 omitting negative trends visible in the independent data (e.g., rising \
 methane, increasing absolute emissions).
-8. **TARGET_WITHOUT_PLAN** — Ambitious long-term targets (e.g., "net-zero by \
+8. **TARGET_WITHOUT_PLAN** - Ambitious long-term targets (e.g., "net-zero by \
 2050") without interim milestones, capital expenditure plans, or demonstrated \
 year-over-year progress.
-9. **OFFSET_RELIANCE** — Emission reductions achieved primarily through \
+9. **OFFSET_RELIANCE** - Emission reductions achieved primarily through \
 carbon offsets or RECs rather than operational/engineering changes.
 
 ## Scoring Methodology
@@ -104,14 +104,14 @@ structure:
       "ambition": <integer 0-100>
     },
     "confidence": "<high | medium | low>",
-    "confidence_rationale": "<why this confidence level — based on data availability>"
+    "confidence_rationale": "<why this confidence level - based on data availability>"
   },
   "findings": [
     {
       "severity": "<high | medium | low>",
       "type": "<one of the 9 finding types above>",
       "title": "<short descriptive title>",
-      "description": "<detailed explanation of the finding — 2-4 sentences>",
+      "description": "<detailed explanation of the finding - 2-4 sentences>",
       "claim_refs": [<integer indices of relevant claims from claims_extracted>],
       "evidence": [
         {
@@ -134,7 +134,7 @@ structure:
 async def cross_reference_agent(state: dict) -> dict:
     """Agent 4: Cross-reference claims against independent data and score.
 
-    Pure reasoning over accumulated state — no tool calls, no database access.
+    Pure reasoning over accumulated state - no tool calls, no database access.
     Uses Claude Opus for deep analytical reasoning.
 
     Input:  state["company_profile"], state["claims_extracted"], state["independent_data"]

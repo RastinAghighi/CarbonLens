@@ -1,4 +1,4 @@
-# CarbonLens — Claude Code Task List
+# CarbonLens - Claude Code Task List
 
 ## How to use this file:
 1. Open Claude Code in the /home/claude/CarbonLens directory (or wherever you clone the project)
@@ -25,7 +25,7 @@ Don't build any features yet. Just get both servers running."
 
 ## TASK 2: Database initialization script
 
-"Read docs/ARCHITECTURE.md — specifically the DATABASE SCHEMAS section and the ESTIMATION ENGINE section. 
+"Read docs/ARCHITECTURE.md - specifically the DATABASE SCHEMAS section and the ESTIMATION ENGINE section. 
 
 Create backend/scripts/init_database.py that:
 1. Creates a SQLite database at backend/data/carbonlens.db
@@ -53,7 +53,7 @@ We need data for at least these companies:
 
 Also create backend/data/company_aliases.json using the COMPANY_ALIASES dict from docs/ARCHITECTURE.md.
 
-Use realistic but synthetic data — we're simulating what EPA GHGRP data looks like. Include multiple reporting years (2021, 2022, 2023) for ExxonMobil so the trend analysis works."
+Use realistic but synthetic data - we're simulating what EPA GHGRP data looks like. Include multiple reporting years (2021, 2022, 2023) for ExxonMobil so the trend analysis works."
 
 **Done when:** You can query `SELECT parent_company, SUM(total_emissions_mtco2e) FROM ghgrp_facilities WHERE parent_company LIKE '%Exxon%' GROUP BY reporting_year` and get meaningful results.
 
@@ -63,11 +63,11 @@ Use realistic but synthetic data — we're simulating what EPA GHGRP data looks 
 
 "Create these utility modules in backend/core/:
 
-1. backend/core/database.py — Database connection helper. A function get_db() that returns a SQLite connection to backend/data/carbonlens.db. Helper functions: query_eeio_factor(sector_code), query_defra_factor(category, subcategory), query_ghgrp_facilities(company_name) that handles alias matching using company_aliases.json, query_industry_benchmark(sector).
+1. backend/core/database.py - Database connection helper. A function get_db() that returns a SQLite connection to backend/data/carbonlens.db. Helper functions: query_eeio_factor(sector_code), query_defra_factor(category, subcategory), query_ghgrp_facilities(company_name) that handles alias matching using company_aliases.json, query_industry_benchmark(sector).
 
-2. backend/core/estimation_engine.py — The estimate_emissions() function from docs/ARCHITECTURE.md. Takes revenue_usd and sector string, returns estimated emissions dict.
+2. backend/core/estimation_engine.py - The estimate_emissions() function from docs/ARCHITECTURE.md. Takes revenue_usd and sector string, returns estimated emissions dict.
 
-3. backend/core/schemas.py — Pydantic models for: VerifyRequest (company_name: str), MeasureRequest (file upload), JobStatus (job_id, status, current_agent, agents list, result), VerifyResult (matching the verify output schema in ARCHITECTURE.md), MeasureResult (matching the measure output schema).
+3. backend/core/schemas.py - Pydantic models for: VerifyRequest (company_name: str), MeasureRequest (file upload), JobStatus (job_id, status, current_agent, agents list, result), VerifyResult (matching the verify output schema in ARCHITECTURE.md), MeasureResult (matching the measure output schema).
 
 Read docs/ARCHITECTURE.md for the exact schemas and estimation engine code."
 
@@ -75,7 +75,7 @@ Read docs/ARCHITECTURE.md for the exact schemas and estimation engine code."
 
 ---
 
-## TASK 5: Verify Agent 1 — Company Intelligence Agent
+## TASK 5: Verify Agent 1 - Company Intelligence Agent
 
 "Build backend/agents/verify/company_intel.py.
 
@@ -98,7 +98,7 @@ Use the anthropic Python SDK. Model: claude-sonnet-4-20250514."
 
 ---
 
-## TASK 6: Verify Agent 2 — Report Extraction Agent
+## TASK 6: Verify Agent 2 - Report Extraction Agent
 
 "Build backend/agents/verify/report_extraction.py.
 
@@ -117,7 +117,7 @@ Use claude-sonnet-4-20250514."
 
 ---
 
-## TASK 7: Verify Agent 3 — Independent Data Agent
+## TASK 7: Verify Agent 3 - Independent Data Agent
 
 "Build backend/agents/verify/independent_data.py.
 
@@ -137,7 +137,7 @@ Use claude-sonnet-4-20250514 for the news research portion only."
 
 ---
 
-## TASK 8: Verify Agent 4 — Cross-Reference & Scoring Agent
+## TASK 8: Verify Agent 4 - Cross-Reference & Scoring Agent
 
 "Build backend/agents/verify/cross_reference.py.
 
@@ -155,7 +155,7 @@ CRITICAL: The prompt must include the rule 'ONLY flag findings where you have co
 
 ---
 
-## TASK 9: Verify Agent 5 — Report Generation Agent  
+## TASK 9: Verify Agent 5 - Report Generation Agent  
 
 "Build backend/agents/verify/report_generation.py.
 
@@ -174,8 +174,8 @@ Use claude-sonnet-4-20250514."
 "Create backend/agents/verify/pipeline.py that chains all 5 verify agents together.
 
 Then update backend/main.py to add:
-- POST /api/verify — accepts {company_name}, starts the pipeline in a background thread, returns {job_id}
-- GET /api/verify/{job_id} — returns current status including which agent is running, status messages, and the final result when complete
+- POST /api/verify - accepts {company_name}, starts the pipeline in a background thread, returns {job_id}
+- GET /api/verify/{job_id} - returns current status including which agent is running, status messages, and the final result when complete
 
 Use a simple in-memory dict to track jobs. Each agent updates the job status as it starts/completes. The status response should include:
 {
@@ -192,29 +192,29 @@ Test by calling POST /api/verify with 'ExxonMobil' and polling the status endpoi
 
 ---
 
-## TASK 11: Frontend — Landing page
+## TASK 11: Frontend - Landing page
 
-"Read docs/frontend_design_spec.md — Screen 1 (Landing / Home) section.
+"Read docs/frontend_design_spec.md - Screen 1 (Landing / Home) section.
 
-Build the landing page in frontend/src/ following the design spec exactly. Two mode cards side by side — Verify with a text input and Analyze button, Measure with a file upload zone and Calculate button. Stats bar at the bottom with the three research statistics.
+Build the landing page in frontend/src/ following the design spec exactly. Two mode cards side by side - Verify with a text input and Analyze button, Measure with a file upload zone and Calculate button. Stats bar at the bottom with the three research statistics.
 
 Use Tailwind CSS. Font: Inter from Google Fonts. Color system from the design spec (teal #0D9488 primary, etc.).
 
-No backend connection yet — just the static UI."
+No backend connection yet - just the static UI."
 
 **Done when:** The landing page matches the design spec and looks professional, not like a hackathon toy.
 
 ---
 
-## TASK 12: Frontend — Verify progress + results pages
+## TASK 12: Frontend - Verify progress + results pages
 
-"Read docs/frontend_design_spec.md — Screen 2 (Verify Progress) and Screen 3 (Verify Results) sections.
+"Read docs/frontend_design_spec.md - Screen 2 (Verify Progress) and Screen 3 (Verify Results) sections.
 
 Build these two views:
 1. Verify Progress: Agent stepper timeline showing 5 agents with pending/running/complete states. Poll GET /api/verify/{job_id} every 1.5 seconds to update status. Show live status messages for the running agent.
 2. Verify Results: Transparency score gauge (circular), sub-score bars, executive summary card, findings cards with severity badges, estimation comparison visualization.
 
-Connect to the real backend — clicking Analyze on the landing page should POST to /api/verify, navigate to the progress view, poll until complete, then show results.
+Connect to the real backend - clicking Analyze on the landing page should POST to /api/verify, navigate to the progress view, poll until complete, then show results.
 
 Use the color system from the design spec. Score colors: 0-39 red, 40-59 amber, 60-79 teal, 80-100 green."
 
@@ -222,15 +222,15 @@ Use the color system from the design spec. Score colors: 0-39 red, 40-59 amber, 
 
 ---
 
-## TASK 13: Measure mode — All 4 agents
+## TASK 13: Measure mode - All 4 agents
 
 "Build the Measure mode pipeline. Read docs/ARCHITECTURE.md for the Measure mode agent pipeline.
 
 Create:
-- backend/agents/measure/data_ingestion.py (Agent 1 — LLM parses CSV)
-- backend/agents/measure/classification.py (Agent 2 — LLM classifies into Scope 3 categories)
-- backend/agents/measure/emission_calc.py (Agent 3 — PURE PYTHON, no LLM. Queries SQLite for emission factors, does math)
-- backend/agents/measure/analysis.py (Agent 4 — LLM generates recommendations)
+- backend/agents/measure/data_ingestion.py (Agent 1 - LLM parses CSV)
+- backend/agents/measure/classification.py (Agent 2 - LLM classifies into Scope 3 categories)
+- backend/agents/measure/emission_calc.py (Agent 3 - PURE PYTHON, no LLM. Queries SQLite for emission factors, does math)
+- backend/agents/measure/analysis.py (Agent 4 - LLM generates recommendations)
 - backend/agents/measure/pipeline.py (chains them together)
 
 Then add POST /api/measure and GET /api/measure/{job_id} to main.py.
@@ -243,9 +243,9 @@ CRITICAL for Agent 3: NO LLM CALLS. Every emission factor comes from the databas
 
 ---
 
-## TASK 14: Frontend — Measure progress + results pages
+## TASK 14: Frontend - Measure progress + results pages
 
-"Read docs/frontend_design_spec.md — Screen 4 (Measure Progress) and Screen 5 (Measure Results).
+"Read docs/frontend_design_spec.md - Screen 4 (Measure Progress) and Screen 5 (Measure Results).
 
 Build the Measure mode frontend:
 1. File upload on landing page triggers POST /api/measure
@@ -262,10 +262,10 @@ Connect to the real backend."
 
 "Final polish:
 1. Add a 'New Analysis' button on both results pages to return to home
-2. Test Verify mode on ExxonMobil — make sure output is dramatic and correct
-3. Test Measure mode on sample CSV — make sure output is reasonable  
+2. Test Verify mode on ExxonMobil - make sure output is dramatic and correct
+3. Test Measure mode on sample CSV - make sure output is reasonable  
 4. Fix any UI issues visible at 1920x1080 (Zoom screen share resolution)
-5. Add proper error handling — if an agent fails, show error in the UI, don't crash
+5. Add proper error handling - if an agent fails, show error in the UI, don't crash
 6. Add the methodology/about section in the footer
 
 Don't add new features. Just make what exists work reliably and look good."

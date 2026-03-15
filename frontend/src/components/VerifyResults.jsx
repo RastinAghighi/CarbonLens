@@ -295,7 +295,7 @@ export default function VerifyResults({ companyName, result, onNewAnalysis }) {
               </svg>
             </div>
             <div>
-              <span style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.4)', fontWeight: 400 }}>ESG Intelligence Report — </span>
+              <span style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.4)', fontWeight: 400 }}>ESG Intelligence Report - </span>
               <span style={{ fontSize: '0.9rem', color: '#34D399', fontWeight: 700 }}>{companyName}</span>
             </div>
           </div>

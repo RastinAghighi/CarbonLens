@@ -48,7 +48,7 @@ const AGENTS = [
     thoughts: [
       'Comparing reported vs. estimated emissions...',
       'Detecting disclosure gaps across scopes...',
-      'Scoring data completeness (0–100)...',
+      'Scoring data completeness (0-100)...',
       'Flagging inconsistencies with standards...',
       'Calculating transparency confidence...',
     ],
@@ -367,7 +367,7 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
         const data = await res.json();
         if (!cancelled) {
           setJobId(data.job_id);
-          addFeedEntry('Pipeline started — 5 agents queued', 'info');
+          addFeedEntry('Pipeline started - 5 agents queued', 'info');
         }
       } catch (err) {
         if (!cancelled) {
@@ -418,12 +418,12 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
           const curr = agentMap[key]?.status;
           if (curr && curr !== prev) {
             const name = AGENT_DISPLAY[key];
-            if (curr === 'running') addFeedEntry(`${name} — starting...`, 'running');
+            if (curr === 'running') addFeedEntry(`${name} - starting...`, 'running');
             if (curr === 'complete') {
               const msg = agentMap[key]?.summary;
-              addFeedEntry(`${name} — complete`, 'complete', msg || null);
+              addFeedEntry(`${name} - complete`, 'complete', msg || null);
             }
-            if (curr === 'error') addFeedEntry(`${name} — error`, 'error');
+            if (curr === 'error') addFeedEntry(`${name} - error`, 'error');
           }
         });
         prevStatuses.current = agentMap;
@@ -435,7 +435,7 @@ export default function VerifyProgress({ companyName, onBack, onComplete }) {
           clearInterval(pollRef.current);
           clearInterval(timerRef.current);
           clearInterval(thoughtRef.current);
-          addFeedEntry('Report generation complete — loading results...', 'complete');
+          addFeedEntry('Report generation complete - loading results...', 'complete');
           setTimeout(() => onComplete(data.result), 900);
         } else if (data.status === 'error') {
           clearInterval(pollRef.current);

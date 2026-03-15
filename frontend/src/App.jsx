@@ -66,13 +66,13 @@ function IconLeaf() {
 function BackgroundDecoration() {
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-      {/* Primary glow — top right */}
+      {/* Primary glow - top right */}
       <div style={{
         position: 'absolute', top: '-15%', right: '-8%',
         width: '700px', height: '700px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(16,185,129,0.10) 0%, rgba(16,185,129,0.03) 40%, transparent 70%)',
       }} />
-      {/* Secondary glow — bottom left */}
+      {/* Secondary glow - bottom left */}
       <div style={{
         position: 'absolute', bottom: '5%', left: '-8%',
         width: '500px', height: '500px', borderRadius: '50%',
@@ -206,7 +206,7 @@ function HeroSection({ onScrollToModes }) {
         marginBottom: '48px',
         animation: 'fade-up 0.9s ease-out',
       }}>
-        Verify any company's sustainability claims or calculate your own Scope 3 emissions — in minutes, not months.
+        Verify any company's sustainability claims or calculate your own Scope 3 emissions - in minutes, not months.
       </p>
 
       {/* CTA Buttons */}
@@ -324,7 +324,7 @@ function ModeCards({ onAnalyze, onMeasure }) {
 
             {/* Feature list */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
-              {['Greenwashing detection', 'Cross-referenced EPA & DEFRA data', 'Trust score 0–100 with evidence'].map(f => (
+              {['Greenwashing detection', 'Cross-referenced EPA & DEFRA data', 'Trust score 0-100 with evidence'].map(f => (
                 <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'rgba(226,245,236,0.55)' }}>
                   <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#10B981', flexShrink: 0 }} />
                   {f}
@@ -374,7 +374,7 @@ function ModeCards({ onAnalyze, onMeasure }) {
                 Calculate your Scope 3 emissions
               </p>
               <p style={{ fontSize: '0.875rem', color: 'rgba(226,245,236,0.45)', lineHeight: 1.7 }}>
-                Upload procurement or spend data and get a full Scope 3 breakdown using EPA emission factors — no consultants, no six-figure contracts.
+                Upload procurement or spend data and get a full Scope 3 breakdown using EPA emission factors - no consultants, no six-figure contracts.
               </p>
             </div>
 
@@ -402,7 +402,7 @@ function ModeCards({ onAnalyze, onMeasure }) {
                   <div style={{ color: '#34D399', display: 'flex', justifyContent: 'center', marginBottom: '8px' }}><IconCheck /></div>
                   <p style={{ fontSize: '0.875rem', color: '#34D399', fontWeight: 500 }}>{selectedFile.name}</p>
                   <p style={{ fontSize: '0.75rem', color: 'rgba(226,245,236,0.4)', marginTop: '4px' }}>
-                    {(selectedFile.size / 1024).toFixed(1)} KB — click to change
+                    {(selectedFile.size / 1024).toFixed(1)} KB - click to change
                   </p>
                 </>
               ) : (
@@ -520,7 +520,7 @@ function HowItWorks() {
 function StatsSection() {
   const stats = [
     { value: '7%', label: 'of companies measure all emission scopes', source: 'BCG 2025' },
-    { value: '80–90%', label: 'of emissions hide in the supply chain', source: 'GHG Protocol' },
+    { value: '80-90%', label: 'of emissions hide in the supply chain', source: 'GHG Protocol' },
     { value: '$50K+', label: 'annual cost of legacy enterprise ESG tools', source: 'Market research' },
   ];
 
@@ -579,7 +579,7 @@ function DashboardPreview() {
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #10B981, transparent)' }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 8px #10B981' }} />
-              <p style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.5)', fontWeight: 500 }}>Verify Mode — Sample Report</p>
+              <p style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.5)', fontWeight: 500 }}>Verify Mode - Sample Report</p>
             </div>
 
             <p style={{ fontSize: '1rem', fontWeight: 600, color: '#e2f5ec', marginBottom: '4px' }}>Patagonia, Inc.</p>
@@ -639,7 +639,7 @@ function DashboardPreview() {
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #34D399, transparent)' }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34D399', boxShadow: '0 0 8px #34D399' }} />
-              <p style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.5)', fontWeight: 500 }}>Measure Mode — Sample Report</p>
+              <p style={{ fontSize: '0.8rem', color: 'rgba(226,245,236,0.5)', fontWeight: 500 }}>Measure Mode - Sample Report</p>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
@@ -708,7 +708,7 @@ function CTASection({ onScrollToModes }) {
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.4), transparent)' }} />
 
           <div className="badge-emerald" style={{ marginBottom: '20px', display: 'inline-block' }}>
-            <IconLeaf /> Start Free Today
+            Start Free Today
           </div>
 
           <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 800, letterSpacing: '-0.02em', color: '#e2f5ec', marginBottom: '16px' }}>

@@ -1,7 +1,7 @@
 """Verify Agent 3: Independent Data Agent.
 
 Gathers independent verification data from local databases and estimation
-engine (CODE — not LLM), then uses Claude Sonnet for news/third-party
+engine (CODE - not LLM), then uses Claude Sonnet for news/third-party
 findings only.
 
 Input:  state["company_name"], state["company_profile"], state["claims_extracted"]

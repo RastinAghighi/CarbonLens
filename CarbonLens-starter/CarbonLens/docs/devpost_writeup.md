@@ -1,4 +1,4 @@
-# CarbonLens — Devpost Submission
+# CarbonLens - Devpost Submission
 
 ---
 
@@ -6,17 +6,17 @@
 CarbonLens
 
 ## Tagline
-AI-powered supply chain emissions intelligence — measure your Scope 3 footprint or verify any company's sustainability claims.
+AI-powered supply chain emissions intelligence - measure your Scope 3 footprint or verify any company's sustainability claims.
 
 ---
 
 ## Inspiration
 
-Only 7% of companies comprehensively measure emissions across all scopes — and that number is actually *declining*, down from 10% just two years ago (BCG Climate Survey 2025). Meanwhile, 83% of companies increased their sustainability spending by over 5% last year (Deloitte C-Suite 2025). Money is flowing in, but measurement is falling behind.
+Only 7% of companies comprehensively measure emissions across all scopes - and that number is actually *declining*, down from 10% just two years ago (BCG Climate Survey 2025). Meanwhile, 83% of companies increased their sustainability spending by over 5% last year (Deloitte C-Suite 2025). Money is flowing in, but measurement is falling behind.
 
-The gap is Scope 3: supply chain emissions that account for 80-90% of most companies' total carbon footprint. Even Google — one of the world's most technologically sophisticated companies — admitted in their 2025 Environmental Report that supply chain emissions drove an 11% year-over-year increase in their total footprint. If Google can't easily measure this, what chance does a mid-size manufacturer have?
+The gap is Scope 3: supply chain emissions that account for 80-90% of most companies' total carbon footprint. Even Google - one of the world's most technologically sophisticated companies - admitted in their 2025 Environmental Report that supply chain emissions drove an 11% year-over-year increase in their total footprint. If Google can't easily measure this, what chance does a mid-size manufacturer have?
 
-The tools that exist today — Watershed, Persefoni, CO2 AI — cost $50,000+ per year, require months of onboarding, and are built for enterprises. Small and mid-size businesses, ESG analysts, and journalists have no accessible way to either measure supply chain emissions or independently verify corporate sustainability claims.
+The tools that exist today - Watershed, Persefoni, CO2 AI - cost $50,000+ per year, require months of onboarding, and are built for enterprises. Small and mid-size businesses, ESG analysts, and journalists have no accessible way to either measure supply chain emissions or independently verify corporate sustainability claims.
 
 CarbonLens was built to close both gaps: help companies who *want* to improve (Measure mode) and hold accountable those who don't (Verify mode). Sustainability needs both a carrot and a stick.
 
@@ -26,11 +26,11 @@ CarbonLens was built to close both gaps: help companies who *want* to improve (M
 
 CarbonLens is a multi-agent AI platform with two modes:
 
-**Verify Mode — The Sustainability Claims Detector**
-Enter any company name and CarbonLens deploys five specialized AI agents to: gather a comprehensive company profile from public records, extract every quantitative environmental claim from their sustainability report, collect independent verification data from EPA facility records and industry benchmarks, cross-reference claims against independent data to identify discrepancies, and generate a Transparency Score (0-100) with a detailed evidence report. The result: a forensic analysis showing exactly where a company's sustainability claims hold up, where they fall short, and what can't be verified — all with cited sources.
+**Verify Mode - The Sustainability Claims Detector**
+Enter any company name and CarbonLens deploys five specialized AI agents to: gather a comprehensive company profile from public records, extract every quantitative environmental claim from their sustainability report, collect independent verification data from EPA facility records and industry benchmarks, cross-reference claims against independent data to identify discrepancies, and generate a Transparency Score (0-100) with a detailed evidence report. The result: a forensic analysis showing exactly where a company's sustainability claims hold up, where they fall short, and what can't be verified - all with cited sources.
 
-**Measure Mode — Scope 3 Supply Chain Calculator**
-Upload your procurement data — messy CSVs, Excel files, whatever you have — and CarbonLens deploys four agents to: parse and normalize your data regardless of format, classify each purchase into GHG Protocol Scope 3 categories, look up verified emission factors from EPA and DEFRA databases, and generate a full Scope 3 breakdown with ranked suppliers, carbon hotspots, and specific reduction recommendations. The system takes companies from zero Scope 3 visibility to "roughly right" — accurate enough to identify where to focus, with full transparency about confidence levels.
+**Measure Mode - Scope 3 Supply Chain Calculator**
+Upload your procurement data - messy CSVs, Excel files, whatever you have - and CarbonLens deploys four agents to: parse and normalize your data regardless of format, classify each purchase into GHG Protocol Scope 3 categories, look up verified emission factors from EPA and DEFRA databases, and generate a full Scope 3 breakdown with ranked suppliers, carbon hotspots, and specific reduction recommendations. The system takes companies from zero Scope 3 visibility to "roughly right" - accurate enough to identify where to focus, with full transparency about confidence levels.
 
 Both modes share the same core estimation engine and emission factor knowledge base, creating a unified platform where the same AI that estimates what a company's emissions *should* be (for verification) also calculates what your emissions *are* (for measurement).
 
@@ -38,13 +38,13 @@ Both modes share the same core estimation engine and emission factor knowledge b
 
 ## How we built it
 
-**Architecture:** CarbonLens uses a multi-agent pipeline architecture where each agent is a specialized function in a directed graph. Agents share a state object that accumulates data as it flows through the pipeline. The design separates "understanding" tasks (where LLMs excel — parsing messy data, extracting claims, cross-referencing) from "calculation" tasks (where code is reliable — emission factor lookups, multiplication, aggregation). This separation is the core of our anti-hallucination strategy: no emission number is ever generated by an LLM.
+**Architecture:** CarbonLens uses a multi-agent pipeline architecture where each agent is a specialized function in a directed graph. Agents share a state object that accumulates data as it flows through the pipeline. The design separates "understanding" tasks (where LLMs excel - parsing messy data, extracting claims, cross-referencing) from "calculation" tasks (where code is reliable - emission factor lookups, multiplication, aggregation). This separation is the core of our anti-hallucination strategy: no emission number is ever generated by an LLM.
 
-**AI Layer:** Claude API powers the agent intelligence — Sonnet for extraction and classification tasks, Opus for the complex cross-referencing analysis. Each agent has a carefully designed system prompt with explicit output schemas, critical rules, and guardrails against speculation.
+**AI Layer:** Claude API powers the agent intelligence - Sonnet for extraction and classification tasks, Opus for the complex cross-referencing analysis. Each agent has a carefully designed system prompt with explicit output schemas, critical rules, and guardrails against speculation.
 
 **Data Layer:** Pre-loaded emission factor databases from EPA EEIO (spend-based emission factors for 1,000+ commodity categories) and UK DEFRA (activity-based conversion factors for fuels, transport, materials). EPA GHGRP facility-level emissions data for independent verification. Industry benchmark intensities for revenue-based estimation. All stored in SQLite for fast local queries.
 
-**Frontend:** React application with a real-time agent progress display that shows each agent working — status messages update live as agents parse documents, query databases, and generate analysis. This isn't just a loading screen; it demonstrates the multi-agent architecture in action.
+**Frontend:** React application with a real-time agent progress display that shows each agent working - status messages update live as agents parse documents, query databases, and generate analysis. This isn't just a loading screen; it demonstrates the multi-agent architecture in action.
 
 **Infrastructure:** Python FastAPI backend deployed on Google Cloud Run. Polling-based progress updates for real-time agent status.
 
@@ -66,17 +66,17 @@ Both modes share the same core estimation engine and emission factor knowledge b
 
 **Anti-hallucination architecture:** By design, every emission number traces back to a specific factor from a specific database, multiplied by a specific input value, using a specific formula. No LLM ever generates an emission number. This makes every output auditable and trustworthy.
 
-**The "dark matter" visualization:** Verify mode's estimation comparison visually shows the gap between what a company reports and what their total footprint likely is — making Scope 3 omission immediately visible and visceral.
+**The "dark matter" visualization:** Verify mode's estimation comparison visually shows the gap between what a company reports and what their total footprint likely is - making Scope 3 omission immediately visible and visceral.
 
 **Multi-source cross-referencing:** The system doesn't just check one data source. It triangulates corporate claims against EPA facility data, industry benchmarks, enforcement records, and revenue-based estimates simultaneously. This is something no publicly available tool does today.
 
-**Graceful degradation:** When data is missing — no EPA facilities, no sustainability report found — the system still produces useful analysis using whatever sources are available. "Insufficient independent data" is itself a finding that affects the transparency score.
+**Graceful degradation:** When data is missing - no EPA facilities, no sustainability report found - the system still produces useful analysis using whatever sources are available. "Insufficient independent data" is itself a finding that affects the transparency score.
 
 ---
 
 ## What we learned
 
-Scope 3 accounting is genuinely hard — not because the math is complicated, but because the data is fragmented, inconsistent, and incomplete. The 93% of companies that don't measure all scopes aren't lazy; they lack accessible tools. We also learned that the gap between corporate sustainability claims and independently verifiable data is wider than expected, validating the need for automated verification.
+Scope 3 accounting is genuinely hard - not because the math is complicated, but because the data is fragmented, inconsistent, and incomplete. The 93% of companies that don't measure all scopes aren't lazy; they lack accessible tools. We also learned that the gap between corporate sustainability claims and independently verifiable data is wider than expected, validating the need for automated verification.
 
 Building multi-agent systems reinforced that the key design decision is knowing where to use AI and where to use code. LLMs are exceptional at understanding messy documents and classifying ambiguous data. They're terrible at arithmetic and shouldn't be trusted to generate specific numbers. Designing the boundary between AI understanding and deterministic calculation was the most important architectural decision in the project.
 

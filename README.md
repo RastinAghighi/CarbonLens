@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 ## Run
 
-**Terminal 1 – backend**
+**Terminal 1 - backend**
 
 ```bash
 cd backend
@@ -30,7 +30,7 @@ source .venv/bin/activate
 uvicorn main:app --reload
 ```
 
-**Terminal 2 – frontend**
+**Terminal 2 - frontend**
 
 ```bash
 cd frontend
