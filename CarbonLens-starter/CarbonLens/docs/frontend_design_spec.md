@@ -61,7 +61,7 @@ Three statistics displayed in a row, each with a large number and a small attrib
 - "80-90%" + "of emissions are in the supply chain (Scope 3)" + "GHG Protocol"
 - "$50K+/year" + "cost of current enterprise tools" + "Industry average"
 
-Footer — minimal. "Built with Claude AI • Data from EPA, DEFRA, GHG Protocol • CarbonLens 2026"
+Footer — minimal. "Data from EPA, DEFRA, GHG Protocol • CarbonLens 2026"
 
 ---
 
