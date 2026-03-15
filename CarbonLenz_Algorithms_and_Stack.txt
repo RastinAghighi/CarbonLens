@@ -1,0 +1,698 @@
+================================================================================
+                    CARBONLENZ — COMPLETE ALGORITHM & STACK INVENTORY
+================================================================================
+
+Project: CarbonLenz — AI-Powered Supply Chain Emissions Intelligence Platform
+Two Modes: Verify (analyze corporate sustainability claims) and Measure (calculate Scope 3 emissions)
+
+================================================================================
+                              TABLE OF CONTENTS
+================================================================================
+1.  Frontend Stack & Libraries
+2.  Backend Stack & Libraries
+3.  External APIs & Services
+4.  Database Schema & Data Sources
+5.  Measure Pipeline — 4 Agents (Algorithms)
+6.  Verify Pipeline — 5 Agents (Algorithms)
+7.  Emission Calculation Algorithms
+8.  Transparency Scoring Algorithm
+9.  Revenue-Based Estimation Algorithm
+10. Frontend Algorithms (State, Polling, Rendering)
+11. Data Normalization & Transformation Algorithms
+12. Utility Algorithms
+13. API Endpoints & Communication Flow
+14. Deployment & Infrastructure
+15. Environment Variables
+
+================================================================================
+1. FRONTEND STACK & LIBRARIES
+================================================================================
+
+Framework & Build:
+  - React 19.2.4 (UI library)
+  - React DOM 19.2.4 (DOM rendering)
+  - Vite 7.3.1 (build tool / dev server)
+  - @vitejs/plugin-react (React support for Vite)
+  - @tailwindcss/vite (Tailwind CSS Vite plugin)
+
+Styling:
+  - Tailwind CSS 4.2.1 (utility-first CSS framework)
+  - Google Fonts — Inter (loaded via index.html)
+
+Charting:
+  - Recharts 3.8.0 (chart library built on D3)
+    Charts used: BarChart, AreaChart, PieChart, RadarChart, custom SVG gauge
+
+Linting:
+  - ESLint 9.39.4
+  - eslint-plugin-react-hooks
+  - eslint-plugin-react-refresh
+  - @eslint/js
+
+Hosting:
+  - Firebase Hosting (SPA mode with rewrite rules)
+  - firebase.json, .firebaserc config files
+
+React Hooks Used:
+  - useState (component state management)
+  - useEffect (side effects: polling, timers, animations)
+  - useRef (mutable refs: intervals, scroll containers)
+  - useCallback (memoized callbacks to prevent re-renders)
+
+Frontend Components:
+  - App.jsx — Main app, mode switching (Verify/Measure), file upload, chat UI
+  - MeasureProgress.jsx — Real-time 4-agent progress UI for Measure mode
+  - MeasureResults.jsx — Final results dashboard for Measure mode
+  - VerifyProgress.jsx — Real-time 5-agent progress UI for Verify mode
+  - VerifyResults.jsx — Comprehensive results dashboard for Verify mode
+  - ScoreGauge.jsx — Circular SVG gauge (0-100 transparency score)
+
+================================================================================
+2. BACKEND STACK & LIBRARIES
+================================================================================
+
+Framework & Server:
+  - FastAPI (Python web framework)
+  - Uvicorn (ASGI server)
+  - Python 3.11
+
+AI / LLM:
+  - anthropic (Anthropic Python SDK for Claude API)
+  - google-generativeai (Google Generative AI SDK for Gemini)
+
+Data Validation:
+  - Pydantic (via FastAPI, data models and request/response schemas)
+
+Database:
+  - sqlite3 (Python standard library, local SQLite database)
+
+Environment:
+  - python-dotenv (load .env files)
+
+Orchestration:
+  - langgraph (agent orchestration framework — listed in requirements)
+
+CORS:
+  - fastapi.middleware.cors.CORSMiddleware
+
+Other Python Standard Library:
+  - asyncio (async job execution)
+  - json (JSON parsing/serialization)
+  - uuid (job ID generation)
+  - os (environment variable access)
+  - re (regex for text processing)
+
+Docker:
+  - Python 3.11-slim base image
+  - gcc, build-essential (for native compilation)
+
+================================================================================
+3. EXTERNAL APIs & SERVICES
+================================================================================
+
+Anthropic Claude API:
+  - Claude Sonnet 4 (claude-sonnet-4-20250514)
+    Used by: Measure Agents 1, 2, 4; Verify Agents 1, 2, 3 (partial), 5
+  - Claude Opus 4 (claude-opus-4-20250514)
+    Used by: Verify Agent 4 (Cross-Reference & Scoring — complex reasoning)
+  - API Pattern: REST, system prompts, message-based chat, max_tokens config
+
+Google Generative AI (Gemini):
+  - Gemini 2.0 Flash
+    Used by: POST /api/chat endpoint (AI assistant for Q&A)
+  - Fallback: Canned replies when 429 rate-limit errors occur
+
+Firebase:
+  - Firebase Hosting (frontend deployment)
+
+Google Cloud Run:
+  - Backend deployment (Docker container)
+
+================================================================================
+4. DATABASE SCHEMA & DATA SOURCES
+================================================================================
+
+Database: SQLite at backend/data/carbonlens.db
+
+Table: eeio_factors (EPA EEIO Spend-Based Emission Factors)
+  Columns: id, sector_code (NAICS), sector_name, ef_kgco2e_per_usd, ef_year, source
+  ~36 rows covering sectors like:
+    324110 (Petroleum Refining) = 1.28 kgCO2e/USD
+    481000 (Air Transportation) = 1.10 kgCO2e/USD
+    522000 (Financial Services) = 0.05 kgCO2e/USD
+    327310 (Cement Manufacturing) = 1.82 kgCO2e/USD
+  Range: 0.05 to 1.82 kgCO2e/USD
+
+Table: defra_factors (UK DEFRA Activity-Based Factors)
+  Columns: id, category, subcategory, unit, ef_value, ef_year, source
+  ~22 rows (electricity, natural gas, air travel, freight, etc.)
+
+Table: ghgrp_facilities (EPA GHGRP Facility-Level Emissions)
+  Columns: id, facility_name, parent_company, city, state, lat, lon,
+           naics_code, industry_sector, reporting_year,
+           total_emissions_mtco2e, co2_emissions, methane_emissions, n2o_emissions
+  ~250 synthetic records for: ExxonMobil (~45 facilities x 3 years),
+    Shell (~30 facilities), Amazon (~20 facilities), Google (~10 facilities)
+
+Table: industry_benchmarks (Sector Benchmarks)
+  Columns: id, sector, avg_intensity_tco2e_per_m_revenue, median_intensity,
+           p25_intensity, p75_intensity, sample_size, source, year
+  15 sectors (Oil & Gas, Tech, Utilities, Automotive, etc.)
+
+Table: jobs (Completed Results Persistence)
+  Columns: job_type, job_id, company_name, result (JSON blob), created_at
+  Stores completed Verify and Measure job results
+
+Supporting Data File:
+  - backend/data/company_aliases.json
+    Maps canonical company names to database name variants
+    Example: "ExxonMobil" -> ["Exxon Mobil Corporation", "XTO Energy"]
+
+Database Scripts:
+  - backend/scripts/init_database.py (creates tables, seeds EEIO/DEFRA/benchmark data)
+  - backend/scripts/load_ghgrp_data.py (loads synthetic GHGRP facility records)
+
+================================================================================
+5. MEASURE PIPELINE — 4 AGENTS (ALGORITHMS)
+================================================================================
+
+Orchestration: backend/agents/measure/pipeline.py
+  - In-memory job store + SQLite persistence
+  - Sequential 4-agent chain
+  - Status tracking per agent (pending -> running -> complete/error)
+  - Async execution via asyncio
+
+--- Agent 1: Data Ingestion (backend/agents/measure/data_ingestion.py) ---
+  Model: Claude Sonnet 4
+  Input: Raw CSV text from uploaded file
+  Output: Normalized JSON array of procurement line items
+
+  Algorithm:
+    1. Send raw CSV text to Claude with structured prompt
+    2. Claude parses columns, detects headers, handles varied formats
+    3. Normalizes each row into standardized schema:
+       {supplier_name, description, amount_usd, quantity, unit,
+        location, po_number, date, data_quality}
+    4. Excludes subtotals, blank rows, headers
+    5. Infers missing supplier names from context
+    6. Cleans location formatting
+    7. Assigns data_quality score:
+       - high: all fields present (supplier, description, amount, quantity, unit)
+       - medium: core fields present, quantity/unit missing
+       - low: amount or description missing/unclear
+    8. Strip markdown fencing from LLM response, parse JSON
+
+--- Agent 2: Category Classification (backend/agents/measure/classification.py) ---
+  Model: Claude Sonnet 4
+  Input: Normalized procurement items from Agent 1
+  Output: Items enriched with Scope 3 category and EEIO sector code
+
+  Algorithm:
+    1. Send normalized items to Claude with GHG Protocol Scope 3 category definitions
+    2. Claude classifies each item into one of 15 Scope 3 categories:
+       Cat 1: Purchased goods & services
+       Cat 2: Capital goods
+       Cat 3: Fuel & energy-related activities
+       Cat 4: Upstream transportation & distribution
+       Cat 5: Waste generated in operations
+       Cat 6: Business travel
+       Cat 7: Employee commuting
+       Cat 8: Upstream leased assets
+       Cat 9: Downstream transportation & distribution
+       Cat 10: Processing of sold products
+       Cat 11: Use of sold products
+       Cat 12: End-of-life treatment of sold products
+       Cat 13: Downstream leased assets
+       Cat 14: Franchises
+       Cat 15: Investments
+    3. Assigns EPA EEIO sector code (NAICS-based, e.g., 324110, 481000)
+    4. Provides classification reasoning per item
+    5. Parse JSON response, merge classification data into items
+
+--- Agent 3: Emission Calculation (backend/agents/measure/emission_calc.py) ---
+  Type: Pure Python (NO LLM calls)
+  Input: Classified items from Agent 2
+  Output: Items with calculated emissions
+
+  Algorithm:
+    For each line item:
+      1. Validate amount_usd exists and is > 0
+      2. Query SQLite eeio_factors table by sector_code (ef_lookup_key)
+      3. If factor found:
+           emissions_kgco2e = amount_usd * ef_kgco2e_per_usd
+           calculation_status = "calculated"
+           calculation_formula = "{amount} USD × {factor} kgCO2e/USD = {result} kgCO2e"
+      4. If no factor found:
+           emissions_kgco2e = 0
+           calculation_status = "no_emission_factor"
+      5. If invalid amount:
+           emissions_kgco2e = 0
+           calculation_status = "invalid_amount"
+      6. Store emission_factor value and calculation_note for audit trail
+
+--- Agent 4: Analysis & Recommendations (backend/agents/measure/analysis.py) ---
+  Model: Claude Sonnet 4 (for hotspots + recommendations only)
+  Input: Calculated items from Agent 3
+  Output: Aggregated analysis + AI-generated insights
+
+  Algorithm — Step 1 (Pure Python Aggregation):
+    By Scope 3 Category:
+      - Group items by scope3_category
+      - Sum emissions_kgco2e per category
+      - Calculate percent_of_total = (category_sum / grand_total) * 100
+      - Count items per category
+      - List top contributors (highest-emitting items)
+
+    By Supplier:
+      - Group items by supplier_name
+      - Sum emissions_kgco2e per supplier
+      - Sum amount_usd (total spend) per supplier
+      - Calculate emission_intensity = total_emissions / total_spend (kgCO2e/USD)
+      - Calculate percent_of_total
+      - Rank suppliers by total emissions
+
+    Summary:
+      - total_emissions_kgco2e (converted to tCO2e for display)
+      - total_items_processed
+      - items_calculated (with successful emission calc)
+      - items_unclassified (no factor or invalid)
+
+  Algorithm — Step 2 (LLM Analysis):
+    1. Send aggregated data to Claude Sonnet 4
+    2. Claude generates:
+       - hotspots: [{title, description, emissions_kgco2e, type (category/supplier/item)}]
+       - recommendations: [{title, description, priority (1-5), target,
+           potential_reduction_pct, difficulty (low/medium/high), timeframe}]
+       - data_quality_summary: text assessment
+    3. Recommendations sorted by priority (High > Medium > Low)
+
+================================================================================
+6. VERIFY PIPELINE — 5 AGENTS (ALGORITHMS)
+================================================================================
+
+Orchestration: backend/agents/verify/pipeline.py
+  - In-memory job store + SQLite persistence
+  - Sequential 5-agent chain
+  - Status tracking per agent
+  - Result normalization with SVG chart data transformation
+
+--- Agent 1: Company Intelligence (backend/agents/verify/company_intel.py) ---
+  Model: Claude Sonnet 4
+  Input: Company name (string)
+  Output: Company profile with GHGRP data
+
+  Algorithm:
+    Step 1 (LLM Query):
+      - Claude generates company profile from training knowledge:
+        {official_name, ticker, industry, revenue_usd, hq_location, employees,
+         business_segments[], key_regions[], sustainability_report_titles[],
+         known_commitments[], controversies[]}
+
+    Step 2 (Database Query — Python):
+      - Query ghgrp_facilities table using company name
+      - Resolve aliases via company_aliases.json
+      - Aggregate: total facilities, total emissions, reporting years
+      - Build facility list with location, sector, emissions
+
+    Step 3 (Merge):
+      - Combine LLM profile + GHGRP facility summary
+      - Add ghgrp_data: {total_facilities, total_emissions_mtco2e,
+          reporting_years[], facilities[], emissions_trend[]}
+
+--- Agent 2: Report Extraction (backend/agents/verify/report_extraction.py) ---
+  Model: Claude Sonnet 4
+  Input: Company profile from Agent 1
+  Output: Extracted sustainability claims
+
+  Algorithm:
+    1. Claude simulates extracting claims from company's public sustainability reports
+    2. Generates 8-15 quantitative claims covering:
+       - Scope 1, 2, 3 absolute emissions
+       - Reduction targets & progress
+       - Renewable energy percentage
+       - Water usage metrics
+       - Waste metrics
+       - Carbon intensity metrics
+    3. Each claim structured as:
+       {text, category, scope, metric_type, value, unit,
+        baseline_year, target_year, page}
+    4. Categories: emissions_reduction, renewable_energy, water, waste,
+       net_zero_target, carbon_intensity, supply_chain, biodiversity, circular_economy
+    5. Scopes: scope_1, scope_2, scope_3, scope_1_2, scope_1_2_3, non_ghg, all_scopes
+    6. Metric types: absolute, intensity, percentage, target, cumulative
+
+--- Agent 3: Independent Data (backend/agents/verify/independent_data.py) ---
+  Model: Claude Sonnet 4 (partial — only for news/third-party)
+  Input: Company name, profile, extracted claims
+  Output: Independent verification dataset
+
+  Algorithm:
+    Step 1 — GHGRP Query (Python):
+      - Query ghgrp_facilities for company's EPA-reported emissions
+      - Aggregate by year for trend analysis
+
+    Step 2 — Industry Benchmark (Python):
+      - Query industry_benchmarks table by company's sector
+      - Retrieve avg, median, p25, p75 intensity values
+
+    Step 3 — Revenue Estimation (Python):
+      - Run estimation_engine.estimate_emissions(revenue, sector)
+      - Compare estimated vs reported emissions
+
+    Step 4 — Third-Party Data (LLM):
+      - Claude generates plausible third-party findings:
+        {cdp_score, science_based_targets: {status, target_year, scope},
+         controversies: [{title, date, severity, description}],
+         third_party_ratings: [{agency, rating, date}],
+         regulatory_actions: [{agency, action, date, description}]}
+
+    Output: {ghgrp_emissions, industry_benchmark, emission_estimates,
+             news_and_third_party}
+
+--- Agent 4: Cross-Reference & Scoring (backend/agents/verify/cross_reference.py) ---
+  Model: Claude Opus 4 (most capable model for complex reasoning)
+  Input: Company profile + extracted claims + independent data
+  Output: Transparency score + forensic findings
+
+  Algorithm — Forensic Analysis (9 check types):
+    1. INTENSITY_VS_ABSOLUTE: Reports intensity improvements while absolute emissions rise
+    2. MISSING_SCOPE: Omits Scope 3 from targets despite material supply chain
+    3. BOUNDARY_EXCLUSION: Excludes subsidiaries, JVs, or acquired entities
+    4. BASELINE_MANIPULATION: Cherry-picked baseline year for favorable comparison
+    5. EPA_DISCREPANCY: Self-reported figures differ from EPA GHGRP data
+    6. UNVERIFIABLE_CLAIM: Major claims with no independent corroboration
+    7. SELECTIVE_REPORTING: Omits negative trends, highlights only improvements
+    8. TARGET_WITHOUT_PLAN: Ambitious long-term targets without interim milestones
+    9. OFFSET_RELIANCE: Reductions achieved via carbon offsets vs operational changes
+
+  Algorithm — Transparency Scoring (4 dimensions):
+    Completeness (weight: 25%):
+      - Reports all scopes (1, 2, 3)?
+      - All facilities included?
+      - Full organizational boundary disclosed?
+      Score: 0-100
+
+    Consistency (weight: 30%):
+      - Numbers align with EPA GHGRP data?
+      - Internally consistent across years?
+      - Consistent with industry benchmarks?
+      Score: 0-100
+
+    Verifiability (weight: 25%):
+      - How much can be cross-referenced with third parties?
+      - Third-party audits or verifications present?
+      - CDP disclosure, SBTi validation?
+      Score: 0-100
+
+    Ambition (weight: 20%):
+      - Targets aligned with 1.5°C pathway?
+      - Year-over-year demonstrated progress?
+      - Scope 3 reduction commitments?
+      Score: 0-100
+
+    Overall Score = (Completeness × 0.25) + (Consistency × 0.30)
+                  + (Verifiability × 0.25) + (Ambition × 0.20)
+
+    Confidence Level: high / medium / low
+
+  Output: {transparency_score: {overall, breakdown, confidence},
+           findings[], positive_observations[],
+           analysis_summary, data_limitations}
+
+--- Agent 5: Report Generation (backend/agents/verify/report_generation.py) ---
+  Model: Claude Sonnet 4
+  Input: All accumulated pipeline state
+  Output: Human-readable transparency report
+
+  Algorithm:
+    1. Receives full context: company profile, claims, independent data,
+       cross-reference analysis (scores, findings)
+    2. Claude generates narrative report following guidelines:
+       - Fair and evidence-based (forensic analysis, not activism)
+       - Plain language with jargon definitions
+       - Concrete numbers and comparisons
+       - Balanced (strengths and concerns)
+       - Structured and skimmable
+    3. Output structure:
+       {executive_summary, score_context: {overall, completeness, consistency,
+        verifiability, ambition}, findings_narrative[], positive_notes[],
+        data_gaps[], methodology}
+
+================================================================================
+7. EMISSION CALCULATION ALGORITHMS
+================================================================================
+
+Spend-Based Method (EEIO — Used in Measure Pipeline):
+  Formula: emissions_kgco2e = amount_usd × ef_kgco2e_per_usd
+  Source: EPA Environmentally-Extended Input-Output factors
+  Factors vary by NAICS sector code (36 sectors covered)
+
+Supplier Emission Intensity:
+  Formula: intensity = total_emissions_kgco2e / total_spend_usd
+  Unit: kgCO2e per USD spent
+  Used to rank suppliers by carbon efficiency
+
+Category Aggregation:
+  Formula: category_emissions = SUM(item_emissions for all items in category)
+  Formula: percent_of_total = (category_emissions / grand_total) × 100
+
+Supplier Aggregation:
+  Formula: supplier_emissions = SUM(item_emissions for all items by supplier)
+  Formula: supplier_spend = SUM(item_amount_usd for all items by supplier)
+
+Conversion:
+  tCO2e = kgCO2e / 1000 (display conversion)
+
+================================================================================
+8. TRANSPARENCY SCORING ALGORITHM
+================================================================================
+
+Weighted Average Score:
+  Overall = (Completeness × 0.25) + (Consistency × 0.30)
+          + (Verifiability × 0.25) + (Ambition × 0.20)
+
+Each dimension scored 0-100 by Claude Opus 4 based on evidence analysis.
+
+Score Color Mapping (Frontend):
+  80-100 → Green (#34D399)  — Strong transparency
+  60-79  → Teal (#10B981)   — Good transparency
+  40-59  → Amber (#F59E0B)  — Moderate concerns
+  0-39   → Red (#EF4444)    — Significant concerns
+
+Confidence Level:
+  high   — Multiple independent data sources corroborate analysis
+  medium — Some independent data, some gaps
+  low    — Limited independent data available
+
+================================================================================
+9. REVENUE-BASED ESTIMATION ALGORITHM
+================================================================================
+
+File: backend/core/estimation_engine.py
+
+Algorithm:
+  1. Look up sector intensity (tCO2e per million USD revenue):
+     Oil & Gas: 450, Utilities: 380, Mining: 320, Chemicals: 280,
+     Steel: 350, Cement: 400, Airlines: 200, Shipping: 180,
+     Automotive: 120, Food & Beverage: 90, Retail: 40,
+     Technology: 15, Finance: 8, Healthcare: 25, Real Estate: 30
+
+  2. Calculate Scope 1+2: base_emissions = (revenue_usd / 1,000,000) × sector_intensity
+
+  3. Apply Scope 3 multiplier:
+     Oil & Gas: 5.0x, Utilities: 0.5x, Mining: 3.0x, Chemicals: 4.0x,
+     Steel: 3.5x, Cement: 2.0x, Airlines: 0.3x, Shipping: 2.0x,
+     Automotive: 12.0x, Food & Beverage: 8.0x, Retail: 10.0x,
+     Technology: 6.0x, Finance: 2.0x, Healthcare: 3.0x, Real Estate: 1.5x
+
+  4. estimated_scope3 = base_emissions × scope3_multiplier
+
+  Output: {estimated_scope1_2, estimated_scope3, total, sector, methodology}
+
+================================================================================
+10. FRONTEND ALGORITHMS (STATE, POLLING, RENDERING)
+================================================================================
+
+Status Polling Algorithm:
+  - Interval: 1.5 seconds (both Verify and Measure modes)
+  - Method: setInterval with fetch to /api/verify/{jobId} or /api/measure/{jobId}
+  - Cleanup: clearInterval on job completion or component unmount
+  - Race condition prevention: cancelled flag checked before state updates
+  - On completion: clear interval, set results, transition to results view
+
+Progress Visualization:
+  - 4-agent pipeline (Measure) or 5-agent pipeline (Verify)
+  - Each agent shows: pending / running (animated) / complete / error
+  - Running state: pulsing ring animation, bouncing dots
+  - CSS animations: @keyframes ping, @keyframes bounce-dot
+
+Live Feed Algorithm (Verify):
+  - Maintains scrollable feed of up to 50 entries
+  - New entries prepended to feed array
+  - Auto-scroll to latest entry via useRef
+  - Entries generated from agent status changes
+
+Timer Algorithm:
+  - Starts when analysis begins
+  - Updates every second via setInterval
+  - Displays elapsed time in MM:SS format
+  - Stops when analysis completes
+
+ScoreGauge SVG Algorithm:
+  - Circle radius: 45, circumference: 2π × 45 ≈ 282.74
+  - Stroke-dasharray: circumference
+  - Stroke-dashoffset: circumference × (1 - score/100)
+  - Rotation: -90deg (start from top)
+  - Smooth CSS transition on stroke-dashoffset
+
+Data Normalization (Frontend):
+  - normalizeMeasureResult(): Converts backend measure output to frontend format
+  - normalizeVerifyResult(): Converts backend verify output to frontend format
+  - Handles missing fields with fallback defaults
+  - Flattens nested structures for chart compatibility
+
+Chart Rendering (Recharts):
+  - BarChart: Score breakdown, top facilities, claims by category
+  - AreaChart: GHGRP emissions trend over years
+  - PieChart: Emission distribution by scope/category
+  - RadarChart: Transparency score dimensions (4 axes)
+  - Custom SVG: ScoreGauge circular progress
+
+================================================================================
+11. DATA NORMALIZATION & TRANSFORMATION ALGORITHMS
+================================================================================
+
+Measure Result Normalization:
+  Backend output → Frontend display format
+  - total_emissions: Extract from summary.total_emissions_tco2e
+  - category_breakdown: Map by_scope3_category to chart-ready array
+  - supplier_ranking: Sort by_supplier by total_emissions descending
+  - recommendations: Sort by priority (1=High first)
+  - unclassified_items: Filter items where calculation_status != "calculated"
+
+Verify Result Normalization:
+  Backend output → Frontend display format
+  - transparency_score: Extract overall + breakdown scores
+  - executive_summary: From report generation output
+  - findings: From cross-reference analysis, sorted by severity
+  - positive_observations: Separate list
+  - ghgrp_data: Transform facility data for charts
+  - estimation_comparison: Format for comparison display
+  - _raw: Preserve full pipeline state for AI analyst
+
+Markdown Stripping (Backend):
+  All LLM responses processed to remove markdown code fencing:
+    if raw_text starts with "```":
+      remove first line (```json or similar)
+      remove trailing ```
+    Then parse as JSON
+
+JSON Error Recovery:
+  If JSON parsing fails after LLM response:
+    - Log error with raw text
+    - Return empty/default structure
+    - Agent marked as complete with partial data
+
+================================================================================
+12. UTILITY ALGORITHMS
+================================================================================
+
+Company Alias Resolution:
+  File: backend/data/company_aliases.json
+  Algorithm:
+    1. Look up canonical company name in aliases dict
+    2. If found, query database with all alias variants
+    3. Use SQL IN clause with all known names
+    4. Return unified results across all name variants
+  Example: "ExxonMobil" queries for "Exxon Mobil Corporation", "ExxonMobil Corp", "XTO Energy"
+
+Job Management:
+  - UUID generation for unique job IDs
+  - In-memory dict for active jobs (fast polling)
+  - SQLite persistence for completed jobs (survive restarts)
+  - Functions: init_db(), save_job(), load_job()
+
+CORS Middleware:
+  - Allow all origins (["*"]) for development
+  - Allow methods: all
+  - Allow headers: all
+  - Allow credentials: true
+
+Gemini Rate Limit Fallback:
+  - On 429 error from Gemini API
+  - Return canned contextual response
+  - Different fallback for landing vs report context
+
+================================================================================
+13. API ENDPOINTS & COMMUNICATION FLOW
+================================================================================
+
+Backend Endpoints (FastAPI):
+
+  GET  /health
+    → {"status": "ok"}
+
+  POST /api/chat
+    Request:  {messages: [{role, content}], context: "landing"|"report", report_data: {...}}
+    Response: {reply: "string"}
+    Model: Gemini 2.0 Flash (with 429 fallback)
+
+  POST /api/verify
+    Request:  {company_name: "string"}
+    Response: {job_id: "uuid"}
+    Triggers: Async 5-agent pipeline
+
+  GET  /api/verify/{job_id}
+    Response: {job_id, company_name, status, current_agent,
+               agents: [{name, status, message}], result: {...} | null}
+
+  POST /api/measure
+    Request:  FormData with file (CSV/Excel upload)
+    Response: {job_id: "uuid"}
+    Triggers: Async 4-agent pipeline
+
+  GET  /api/measure/{job_id}
+    Response: {job_id, status, current_agent,
+               agents: [{name, status, message}], result: {...} | null}
+
+Frontend → Backend Communication:
+  - Verify: POST to start → poll GET every 1.5s until complete
+  - Measure: POST FormData to start → poll GET every 1.5s until complete
+  - Chat: POST with message history + context for AI assistant responses
+
+================================================================================
+14. DEPLOYMENT & INFRASTRUCTURE
+================================================================================
+
+Frontend Deployment:
+  - Firebase Hosting
+  - SPA rewrite rule: all routes → /index.html
+  - Build: vite build → dist/ folder
+  - Deploy: firebase deploy
+
+Backend Deployment:
+  - Google Cloud Run
+  - Docker container (Python 3.11-slim)
+  - Build steps in Dockerfile:
+    1. Install system deps (gcc, build-essential)
+    2. Install Python deps from requirements.txt
+    3. Run init_database.py (create tables, seed data)
+    4. Run load_ghgrp_data.py (load GHGRP facility records)
+    5. Start: uvicorn main:app --host 0.0.0.0 --port 8080
+
+Database:
+  - SQLite file: backend/data/carbonlens.db
+  - Bundled inside Docker container
+  - Initialized at build time
+
+================================================================================
+15. ENVIRONMENT VARIABLES
+================================================================================
+
+  ANTHROPIC_API_KEY  — API key for Anthropic Claude (required for all agents)
+  GEMINI_API_KEY     — API key for Google Gemini (required for chat endpoint)
+  VITE_API_URL       — Backend URL for frontend (defaults to Cloud Run URL)
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
