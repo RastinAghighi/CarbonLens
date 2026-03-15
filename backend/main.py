@@ -79,6 +79,12 @@ _LANDING_429_FALLBACKS = [
         "and cross-referencing with AI, uses public EPA and DEFRA data, and runs analysis in "
         "minutes instead of requiring consultants or manual report reviews.",
     ),
+    (
+        ["what is carbonlens", "what does carbonlens", "carbonlens do", "tell me about carbonlens", "hi", "hello"],
+        "CarbonLens is an AI-powered supply chain emissions intelligence platform. It has two modes: "
+        "Verify (analyze any company's sustainability claims and get a Transparency Score) and Measure "
+        "(upload procurement data to get Scope 3 emissions and reduction recommendations). Results in minutes, not months.",
+    ),
 ]
 
 
@@ -96,6 +102,12 @@ def _landing_canned_reply_for_429(last_user_message: str) -> str | None:
 # User-facing message when Gemini is rate-limited (no canned answer available).
 _GEMINI_429_MESSAGE = (
     "The AI assistant is temporarily at capacity (rate limit). Please try again in a minute or two."
+)
+
+# When landing chat is fully canned (demo mode), show this if no keyword matches.
+_LANDING_GENERIC_FALLBACK = (
+    "I'm the CarbonLens product guide. Ask about Verify (company sustainability claims) or Measure "
+    "(supply chain emissions). Try: 'What does Verify do?' or 'How long does analysis take?'"
 )
 
 
@@ -163,9 +175,45 @@ class ChatRequest(BaseModel):
     report_data: Optional[dict] = None
 
 
+# region agent log
+_DEBUG_LOG_PATH = Path(__file__).resolve().parent.parent / ".cursor" / "debug.log"
+
+def _debug_log(location: str, message: str, data: dict, hypothesis_id: str = "") -> None:
+    try:
+        payload = {
+            "id": f"log_{id(object())}_{os.getpid()}",
+            "timestamp": __import__("time").time_ns() // 1_000_000,
+            "location": location,
+            "message": message,
+            "data": data,
+            "hypothesisId": hypothesis_id or "chat",
+        }
+        with open(_DEBUG_LOG_PATH, "a") as f:
+            f.write(json.dumps(payload) + "\n")
+    except Exception:
+        pass
+# endregion
+
+
 @app.post("/api/chat")
 async def chat_endpoint(req: ChatRequest):
     api_key = os.environ.get("GEMINI_API_KEY")
+    model_name = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+    # region agent log
+    _debug_log(
+        "main.py:chat_endpoint",
+        "chat request",
+        {
+            "env_var": "GEMINI_API_KEY",
+            "key_configured": bool(api_key),
+            "key_hint": f"...{api_key[-4:]}" if api_key and len(api_key) >= 4 else "(none)",
+            "model": model_name,
+            "context": req.context,
+        },
+        "H1",
+    )
+    # endregion
+
     if not api_key:
         return {"reply": "AI assistant is not configured (GEMINI_API_KEY missing)."}
 
@@ -197,7 +245,7 @@ async def chat_endpoint(req: ChatRequest):
             system_instruction = _LANDING_SYSTEM
 
         model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
+            model_name=model_name,
             system_instruction=system_instruction,
         )
 
@@ -214,6 +262,14 @@ async def chat_endpoint(req: ChatRequest):
 
     except Exception as e:
         if _is_gemini_429_or_quota(e):
+            # region agent log
+            _debug_log(
+                "main.py:chat_endpoint",
+                "429 or quota path",
+                {"exc_type": type(e).__name__, "exc_msg": str(e)[:200]},
+                "H2",
+            )
+            # endregion
             if req.context == "landing" and req.messages:
                 canned = _landing_canned_reply_for_429(req.messages[-1].content)
                 if canned:
